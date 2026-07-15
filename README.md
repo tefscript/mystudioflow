@@ -107,3 +107,11 @@ A integração com WhatsApp é feita via [EvolutionAPI](https://github.com/Evolu
 
 **Stefani Paula Sant'ana Cruz**  
 Engenharia de Software — Católica SC
+
+
+## Changelog
+
+### v1.3.0
+- Fluxo de conexao WhatsApp com geracao de QR code
+- Polling em tempo real na agenda a cada 30s
+- Confirmacao nao enviada para agendamentos retroativos
