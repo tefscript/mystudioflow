@@ -115,3 +115,8 @@ Engenharia de Software — Católica SC
 - Fluxo de conexao WhatsApp com geracao de QR code
 - Polling em tempo real na agenda a cada 30s
 - Confirmacao nao enviada para agendamentos retroativos
+
+
+### v1.4.0
+- Limpeza automatica de instancias WhatsApp inativas apos 7 dias
+- Nome de instancia baseado no nome do estudio
