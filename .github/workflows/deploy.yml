@@ -15,6 +15,10 @@ jobs:
         with:
           node-version: 20
 
+      - name: Rodar testes backend
+        working-directory: backend
+        run: npm ci && npm test
+
       - name: Build frontend
         working-directory: frontend
         run: |
