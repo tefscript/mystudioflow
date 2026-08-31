@@ -1,0 +1,51 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Configurar chave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy frontend
+        run: |
+          rsync -az --delete frontend/dist/ \
+            ec2-user@${{ secrets.EC2_HOST }}:/usr/share/nginx/studioflow/
+
+      - name: Deploy backend
+        run: |
+          rsync -az \
+            backend/src/ \
+            ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/studioflow/backend/src/
+          rsync -az \
+            backend/prisma/ \
+            ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/studioflow/backend/prisma/
+
+      - name: Reiniciar backend
+        run: |
+          ssh ec2-user@${{ secrets.EC2_HOST }} "
+            cd /home/ec2-user/studioflow/backend &&
+            npx prisma migrate deploy &&
+            pm2 restart studioflow-api
+          "
