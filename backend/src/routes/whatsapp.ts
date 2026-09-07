@@ -128,11 +128,13 @@ router.post("/instance", async (req: AuthRequest, res) => {
       body: JSON.stringify({ instanceName, qrcode: true, integration: "WHATSAPP-BAILEYS" }),
     });
 
-    // instância já existe = não é erro
-    if (!response.ok && response.status !== 409) {
-      const err = await response.text();
-      console.log(`[instance] Evolution API error ${response.status}:`, err);
-      return res.status(response.status).json({ error: err });
+    if (!response.ok) {
+      const errText = await response.text();
+      const alreadyExists = response.status === 409 || errText.includes("already in use");
+      if (!alreadyExists) {
+        console.log(`[instance] Evolution API error ${response.status}:`, errText);
+        return res.status(response.status).json({ error: errText });
+      }
     }
 
     await prisma.settings.upsert({
