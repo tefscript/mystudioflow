@@ -32,6 +32,18 @@ function buildInitials(name: string): string {
   return name.trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
 }
 
+function timeToMinutes(time: string): number {
+  const [h, m] = time.split(":").map(Number);
+  return h * 60 + m;
+}
+
+// Duas faixas [start, start+duration) se sobrepõem quando cada uma começa
+// antes do fim da outra. Um agendamento que termina exatamente quando o
+// próximo começa (ex: 14:00-15:00 seguido de 15:00-16:00) não conflita.
+function overlaps(startA: number, durationA: number, startB: number, durationB: number): boolean {
+  return startA < startB + durationB && startB < startA + durationA;
+}
+
 function formatAppointment(apt: any) {
   const services = (apt.services ?? []).map((as: any) => ({
     id: as.serviceId,
@@ -116,15 +128,19 @@ router.post("/", async (req: AuthRequest, res: Response): Promise<void> => {
     return;
   }
 
-  const conflict = await prisma.appointment.findFirst({
-    where: { userId: req.userId!, date, time, status: { notIn: ["cancelado"] } },
+  const totalDuration = services.reduce((sum, s) => sum + s.duration, 0);
+
+  const dayAppointments = await prisma.appointment.findMany({
+    where: { userId: req.userId!, date, status: { notIn: ["cancelado"] } },
   });
+  const newStart = timeToMinutes(time);
+  const conflict = dayAppointments.find((a) =>
+    overlaps(newStart, totalDuration, timeToMinutes(a.time), a.duration)
+  );
   if (conflict) {
     res.status(409).json({ error: "Já existe um agendamento neste horário" });
     return;
   }
-
-  const totalDuration = services.reduce((sum, s) => sum + s.duration, 0);
 
   const apt = await prisma.appointment.create({
     data: {
@@ -182,26 +198,34 @@ router.put("/:id", async (req: AuthRequest, res: Response): Promise<void> => {
   const newDate = data.date ?? existing.date;
   const newTime = data.time ?? existing.time;
 
-  if (newDate !== existing.date || newTime !== existing.time) {
-    const conflict = await prisma.appointment.findFirst({
-      where: { userId: req.userId!, date: newDate, time: newTime, status: { notIn: ["cancelado"] }, id: { not: id } },
+  let totalDuration = existing.duration;
+  let newServiceIds: string[] | null = null;
+  if (data.service_ids && data.service_ids.length > 0) {
+    const services = await prisma.service.findMany({
+      where: { id: { in: data.service_ids }, userId: req.userId! },
     });
+    totalDuration = services.reduce((sum, s) => sum + s.duration, 0);
+    newServiceIds = data.service_ids;
+  }
+
+  if (newDate !== existing.date || newTime !== existing.time || totalDuration !== existing.duration) {
+    const dayAppointments = await prisma.appointment.findMany({
+      where: { userId: req.userId!, date: newDate, status: { notIn: ["cancelado"] }, id: { not: id } },
+    });
+    const newStart = timeToMinutes(newTime);
+    const conflict = dayAppointments.find((a) =>
+      overlaps(newStart, totalDuration, timeToMinutes(a.time), a.duration)
+    );
     if (conflict) {
       res.status(409).json({ error: "Já existe um agendamento neste horário" });
       return;
     }
   }
 
-  let totalDuration = existing.duration;
-  if (data.service_ids && data.service_ids.length > 0) {
-    const services = await prisma.service.findMany({
-      where: { id: { in: data.service_ids }, userId: req.userId! },
-    });
-    totalDuration = services.reduce((sum, s) => sum + s.duration, 0);
-
+  if (newServiceIds) {
     await prisma.appointmentService.deleteMany({ where: { appointmentId: id } });
     await prisma.appointmentService.createMany({
-      data: data.service_ids.map((serviceId) => ({ appointmentId: id, serviceId, id: crypto.randomUUID() })),
+      data: newServiceIds.map((serviceId) => ({ appointmentId: id, serviceId, id: crypto.randomUUID() })),
     });
   }
 
