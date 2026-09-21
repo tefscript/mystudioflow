@@ -113,7 +113,7 @@ describe("POST /api/appointments", () => {
   it("cria agendamento com dados válidos", async () => {
     vi.mocked(prisma.client.findFirst).mockResolvedValue(mockClient as any);
     vi.mocked(prisma.service.findMany).mockResolvedValue([mockService] as any);
-    vi.mocked(prisma.appointment.findFirst).mockResolvedValue(null); // sem conflito
+    vi.mocked(prisma.appointment.findMany).mockResolvedValue([]); // sem conflito
     vi.mocked(prisma.appointment.create).mockResolvedValue(mockAppointment as any);
     vi.mocked(prisma.client.update).mockResolvedValue(mockClient as any);
 
@@ -134,7 +134,7 @@ describe("POST /api/appointments", () => {
   it("retorna 409 quando horário já está ocupado", async () => {
     vi.mocked(prisma.client.findFirst).mockResolvedValue(mockClient as any);
     vi.mocked(prisma.service.findMany).mockResolvedValue([mockService] as any);
-    vi.mocked(prisma.appointment.findFirst).mockResolvedValue(mockAppointment as any); // conflito
+    vi.mocked(prisma.appointment.findMany).mockResolvedValue([mockAppointment] as any); // conflito
 
     const res = await request(app)
       .post("/api/appointments")
@@ -148,6 +148,47 @@ describe("POST /api/appointments", () => {
 
     expect(res.status).toBe(409);
     expect(res.body.error).toContain("horário");
+  });
+
+  it("retorna 409 quando o novo horário se sobrepõe a um agendamento existente (duração diferente)", async () => {
+    vi.mocked(prisma.client.findFirst).mockResolvedValue(mockClient as any);
+    vi.mocked(prisma.service.findMany).mockResolvedValue([mockService] as any);
+    vi.mocked(prisma.appointment.findMany).mockResolvedValue([mockAppointment] as any);
+
+    const res = await request(app)
+      .post("/api/appointments")
+      .set(AUTH())
+      .send({
+        client_id: "client-1",
+        service_ids: ["svc-1"],
+        date: "2026-09-10",
+        time: "14:30",
+      });
+
+    expect(res.status).toBe(409);
+  });
+
+  it("cria agendamento logo após o fim de outro, sem considerar conflito", async () => {
+    vi.mocked(prisma.client.findFirst).mockResolvedValue(mockClient as any);
+    vi.mocked(prisma.service.findMany).mockResolvedValue([mockService] as any);
+    vi.mocked(prisma.appointment.findMany).mockResolvedValue([mockAppointment] as any);
+    vi.mocked(prisma.appointment.create).mockResolvedValue({
+      ...mockAppointment,
+      time: "15:00",
+    } as any);
+    vi.mocked(prisma.client.update).mockResolvedValue(mockClient as any);
+
+    const res = await request(app)
+      .post("/api/appointments")
+      .set(AUTH())
+      .send({
+        client_id: "client-1",
+        service_ids: ["svc-1"],
+        date: "2026-09-10",
+        time: "15:00",
+      });
+
+    expect(res.status).toBe(201);
   });
 
   it("retorna 404 para cliente inexistente", async () => {
@@ -210,6 +251,65 @@ describe("POST /api/appointments", () => {
       });
 
     expect(res.status).toBe(400);
+  });
+});
+
+describe("PUT /api/appointments/:id", () => {
+  it("retorna 404 para agendamento inexistente", async () => {
+    vi.mocked(prisma.appointment.findFirst).mockResolvedValue(null);
+
+    const res = await request(app)
+      .put("/api/appointments/nao-existe")
+      .set(AUTH())
+      .send({ time: "16:00" });
+
+    expect(res.status).toBe(404);
+  });
+
+  it("atualiza sem checar conflito quando data e horário não mudam", async () => {
+    vi.mocked(prisma.appointment.findFirst).mockResolvedValue(mockAppointment as any);
+    vi.mocked(prisma.appointment.update).mockResolvedValue(mockAppointment as any);
+
+    const res = await request(app)
+      .put("/api/appointments/apt-1")
+      .set(AUTH())
+      .send({ notes: "Cliente pediu para confirmar por telefone" });
+
+    expect(res.status).toBe(200);
+    expect(prisma.appointment.findMany).not.toHaveBeenCalled();
+  });
+
+  it("retorna 409 quando o novo horário se sobrepõe a outro agendamento existente", async () => {
+    const outroAgendamento = { ...mockAppointment, id: "apt-2", time: "16:00", duration: 60 };
+    vi.mocked(prisma.appointment.findFirst).mockResolvedValue(mockAppointment as any);
+    vi.mocked(prisma.appointment.findMany).mockResolvedValue([outroAgendamento] as any);
+
+    const res = await request(app)
+      .put("/api/appointments/apt-1")
+      .set(AUTH())
+      .send({ time: "16:30" });
+
+    expect(res.status).toBe(409);
+    expect(prisma.appointment.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ id: { not: "apt-1" } }) })
+    );
+  });
+
+  it("atualiza o horário quando não há sobreposição com outros agendamentos", async () => {
+    vi.mocked(prisma.appointment.findFirst).mockResolvedValue(mockAppointment as any);
+    vi.mocked(prisma.appointment.findMany).mockResolvedValue([]);
+    vi.mocked(prisma.appointment.update).mockResolvedValue({
+      ...mockAppointment,
+      time: "16:30",
+    } as any);
+
+    const res = await request(app)
+      .put("/api/appointments/apt-1")
+      .set(AUTH())
+      .send({ time: "16:30" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.time).toBe("16:30");
   });
 });
 
