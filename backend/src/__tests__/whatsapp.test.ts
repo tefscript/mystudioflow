@@ -170,6 +170,7 @@ describe("GET /api/whatsapp/status", () => {
     const res = await request(app).get("/api/whatsapp/status").set(AUTH());
 
     expect(res.body.connected).toBe(false);
+    expect(res.body.configured).toBe(true);
   });
 
   it("retorna 401 sem autenticação", async () => {

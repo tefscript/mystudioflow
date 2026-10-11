@@ -84,7 +84,9 @@ router.post("/webhook", async (req: Request, res: Response): Promise<void> => {
         ? `Confirmado ${nome}! Te espero às ${hora} 🤎`
         : `Tudo bem ${nome}, cancelei aqui pra você. Se quiser remarcar é só chamar!`;
 
-      await sendWhatsAppMessage(client.userId, client.phone, replyText).catch(() => {});
+      await sendWhatsAppMessage(client.userId, client.phone, replyText).catch(() => {
+        console.error("[webhook] erro ao enviar mensagem pelo WhatsApp:", error);
+      });
     }
   } catch {
     // silencioso
