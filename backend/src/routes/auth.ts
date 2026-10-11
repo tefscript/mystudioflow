@@ -6,15 +6,25 @@ import { z } from "zod";
 import prisma from "../lib/prisma";
 import { requireAuth, AuthRequest } from "../middleware/auth";
 import { sendPasswordResetEmail } from "../services/email";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
-const router = Router();
+function loginRateKey(req: Request): string {
+  const ip = ipKeyGenerator(req.ip || "");
+  const email = String(req.body?.email || "").toLowerCase().trim();
+  return email ? `${email}:${ip}` : ip;
+}
 
-const loginSchema = z.object({
-  email: z.string().email("E-mail inválido"),
-  password: z.string().min(1, "Senha é obrigatória"),
+const loginLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: loginRateKey,
+  message: { error: "Muitas tentativas. Aguarde 1 minuto e tente novamente." },
 });
 
-router.post("/login", async (req: Request, res: Response): Promise<void> => {
+router.post("/login", loginLimiter, async (req: Request, res: Response): Promise<void> => {
+  // ...resto da função continua igual
   const parse = loginSchema.safeParse(req.body);
   if (!parse.success) {
     res.status(400).json({ error: parse.error.errors[0].message });
