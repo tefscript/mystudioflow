@@ -55,7 +55,7 @@ studioflow/
 
 ### Pré-requisitos
 
-- Node.js 18+
+- Node.js 20.19+ (ou 22.12+), exigência do Vite 7
 - PostgreSQL 15+
 
 ### Backend
@@ -86,8 +86,11 @@ npm run dev
 cd frontend
 npm install
 npm run dev
-# Acesse http://localhost:8080
+# Acesse http://localhost:5173
 ```
+
+> O backend só aceita requisições da origem definida em `FRONTEND_URL` (CORS).
+> No `.env.example` ele já vem como `http://localhost:5173`, que é a porta padrão do Vite.
 
 ---
 
@@ -112,11 +115,10 @@ Engenharia de Software — Católica SC
 ## Changelog
 
 ### v1.3.0
-- Fluxo de conexao WhatsApp com geracao de QR code
+- Fluxo de conexão WhatsApp com geração de QR code
 - Polling em tempo real na agenda a cada 30s
-- Confirmacao nao enviada para agendamentos retroativos
-
+- Confirmação não enviada para agendamentos retroativos
 
 ### v1.4.0
-- Limpeza automatica de instancias WhatsApp inativas apos 7 dias
-- Nome de instancia baseado no nome do estudio
+- Limpeza automática de instâncias WhatsApp inativas após 7 dias
+- Nome de instância baseado no nome do estúdio
