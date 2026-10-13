@@ -18,3 +18,6 @@ build/
 .tanstack/
 .wrangler/
 .dev.vars
+
+# Artefatos de build compactados
+*.tar.gz
