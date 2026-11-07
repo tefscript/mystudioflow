@@ -45,11 +45,17 @@ jobs:
           rsync -az \
             backend/prisma/ \
             ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/studioflow/backend/prisma/
+          rsync -az \
+            backend/package.json \
+            backend/package-lock.json \
+            backend/newrelic.js \
+            ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/studioflow/backend/
 
       - name: Reiniciar backend
         run: |
           ssh ec2-user@${{ secrets.EC2_HOST }} "
             cd /home/ec2-user/studioflow/backend &&
+            npm ci --omit=dev &&
             npx prisma migrate deploy &&
-            pm2 restart studioflow-api
+            pm2 restart studioflow-api --update-env
           "
