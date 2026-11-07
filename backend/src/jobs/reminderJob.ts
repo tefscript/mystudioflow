@@ -60,10 +60,10 @@ export function startReminderJob() {
     }
   });
 
-  // roda todo dia às 03:00 — limpa instâncias Evolution presas em connecting há mais de 7 dias
+  // roda todo dia às 03:00 — limpa instâncias Evolution presas em connecting há mais de 1 dia
   cron.schedule("0 3 * * *", async () => {
     try {
-      const limite = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const limite = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
 
       const pendentes = await prisma.settings.findMany({
         where: {
@@ -86,7 +86,7 @@ export function startReminderJob() {
           const { state } = await statusRes.json() as { state?: string };
           if (state === "open") continue; // já conectada, não mexe
 
-          // conectando há mais de 7 dias — deleta
+          // conectando há mais de 1 dia — deleta
           await fetch(`${s.evolutionUrl}/instance/delete/${s.evolutionInstance}`, {
             method: "DELETE",
             headers: { apikey: s.evolutionKey },

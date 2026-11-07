@@ -1,3 +1,4 @@
+import "newrelic";
 import "dotenv/config";
 import app from "./app";
 import { startReminderJob } from "./jobs/reminderJob";
