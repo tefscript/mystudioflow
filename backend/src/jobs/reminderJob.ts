@@ -44,17 +44,20 @@ export function startReminderJob() {
         },
       });
 
-      for (const apt of appointments) {
+      const promessasDeEnvio = appointments.map(apt => {
         const serviceName = apt.services.map((as) => as.service.name).join(", ");
-        sendWhatsAppReminder({
+        return sendWhatsAppReminder({
           userId: apt.userId,
           clientName: apt.client.name,
           clientPhone: apt.client.phone,
           serviceName,
           date: apt.date,
           time: apt.time,
-        }).catch(() => {});
-      }
+        });
+      });
+
+      // Promise.allSettled garante que todos rodem, independentemente de quem falhar ou der certo
+      await Promise.allSettled(promessasDeEnvio);
     } catch {
       // silencioso — não travar o servidor por falha no cron
     }
