@@ -980,11 +980,12 @@ function AppointmentModal({
                 services.map((s) => {
                   const checked = selectedServiceIds.includes(s.id);
                   return (
-                    <label key={s.id} className={cn(
+                    <label key={s.id} htmlFor={`service-${s.id}`} className={cn(
                       "flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors",
                       checked ? "bg-brand-50" : "hover:bg-brand-50/50"
                     )}>
                       <input
+                        id={`service-${s.id}`}
                         type="checkbox"
                         checked={checked}
                         onChange={() => toggleService(s.id)}

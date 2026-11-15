@@ -335,7 +335,7 @@ function WhatsAppSection({
   async function save() {
     setSaving(true);
     try {
-      await onChange({
+      onChange({
         wa_msg_confirmation: confirmation || null,
         wa_msg_reminder: reminder || null,
         wa_msg_reschedule: reschedule || null,

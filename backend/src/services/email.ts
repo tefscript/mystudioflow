@@ -13,7 +13,7 @@ function getTransporter() {
 }
 
 export async function sendPasswordResetEmail(to: string, name: string, token: string) {
-  const appUrl = process.env.APP_URL || "http://18.215.169.165";
+  const appUrl = process.env.APP_URL || "https://mystudioflow.com.br";
   const resetUrl = `${appUrl}/reset-password?token=${token}`;
 
   const transporter = getTransporter();

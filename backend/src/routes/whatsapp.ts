@@ -76,9 +76,6 @@ router.post("/webhook", async (req: Request, res: Response): Promise<void> => {
       await prisma.appointment.update({ where: { id: appointment.id }, data: { status: newStatus } });
 
       const hora = appointment.time;
-      const [ano, mes, dia] = appointment.date.split("-");
-      const dataFmt = `${dia}/${mes}/${ano}`;
-
       const nome = client.name.trim().split(/\s+/)[0];
       const replyText = isConfirm
         ? `Confirmado ${nome}! Te espero às ${hora} 🤎`

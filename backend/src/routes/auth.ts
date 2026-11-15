@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { z } from "zod";
 import prisma from "../lib/prisma";
 import { requireAuth, AuthRequest } from "../middleware/auth";
