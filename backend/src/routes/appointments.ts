@@ -134,7 +134,7 @@ router.post("/", async (req: AuthRequest, res: Response): Promise<void> => {
     where: { userId: req.userId!, date, status: { notIn: ["cancelado"] } },
   });
   const newStart = timeToMinutes(time);
-  const conflict = dayAppointments.find((a) =>
+  const conflict = dayAppointments.some((a) =>
     overlaps(newStart, totalDuration, timeToMinutes(a.time), a.duration)
   );
   if (conflict) {
@@ -213,7 +213,7 @@ router.put("/:id", async (req: AuthRequest, res: Response): Promise<void> => {
       where: { userId: req.userId!, date: newDate, status: { notIn: ["cancelado"] }, id: { not: id } },
     });
     const newStart = timeToMinutes(newTime);
-    const conflict = dayAppointments.find((a) =>
+    const conflict = dayAppointments.some((a) =>
       overlaps(newStart, totalDuration, timeToMinutes(a.time), a.duration)
     );
     if (conflict) {

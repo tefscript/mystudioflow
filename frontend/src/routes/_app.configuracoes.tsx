@@ -332,7 +332,7 @@ function WhatsAppSection({
   const reminderMissingSim = !/\bsim\b/i.test(reminder);
   const reminderMissingNao = !/\bn[aã]o\b/i.test(reminder);
 
-  async function save() {
+  function save() {
     setSaving(true);
     try {
       onChange({

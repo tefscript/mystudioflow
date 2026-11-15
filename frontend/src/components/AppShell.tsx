@@ -27,7 +27,7 @@ const nav = [
   { to: "/configuracoes", label: "Configurações", icon: Settings },
 ];
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const location = useLocation();
   const [dark, setDark] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -231,11 +231,11 @@ export function PageHeader({
   title,
   subtitle,
   action,
-}: {
+}: Readonly<{
   title: string;
   subtitle?: React.ReactNode;
   action?: React.ReactNode;
-}) {
+}>) {
   return (
     <header className="mb-8 flex flex-col gap-4 md:mb-10 md:flex-row md:items-end md:justify-between">
       <div>

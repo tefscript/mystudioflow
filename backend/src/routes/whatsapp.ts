@@ -164,7 +164,7 @@ router.get("/qrcode", async (req: AuthRequest, res) => {
 
     const data = await response.json();
     return res.json(data);
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: "Erro ao buscar QR code" });
   }
 });
