@@ -320,10 +320,10 @@ function WhatsAppConnection() {
 function WhatsAppSection({
   settings,
   onChange,
-}: {
+}: Readonly<{
   settings: Settings;
   onChange: (s: Partial<Settings>) => void;
-}) {
+}>) {
   const [confirmation, setConfirmation] = useState(settings.wa_msg_confirmation ?? DEFAULT_CONFIRMATION);
   const [reminder, setReminder] = useState(settings.wa_msg_reminder ?? DEFAULT_REMINDER);
   const [reschedule, setReschedule] = useState(settings.wa_msg_reschedule ?? DEFAULT_RESCHEDULE);
@@ -397,10 +397,10 @@ function WhatsAppSection({
 function PreferencesSection({
   settings,
   onChange,
-}: {
+}: Readonly<{
   settings: Settings;
   onChange: (s: Partial<Settings>) => void;
-}) {
+}>) {
   return (
     <div>
       <h2 className="mb-1 font-serif text-2xl font-semibold">Preferências</h2>
@@ -435,10 +435,10 @@ function PreferencesSection({
 function NotificationsSection({
   settings,
   onChange,
-}: {
+}: Readonly<{
   settings: Settings;
   onChange: (s: Partial<Settings>) => void;
-}) {
+}>) {
   return (
     <div>
       <h2 className="mb-1 font-serif text-2xl font-semibold">Notificações</h2>
@@ -479,11 +479,11 @@ function Toggle({
   label,
   value,
   onChange,
-}: {
+}: Readonly<{
   label: string;
   value: boolean;
   onChange: (v: boolean) => void;
-}) {
+}>) {
   return (
     <button
       onClick={() => onChange(!value)}
@@ -503,7 +503,7 @@ function Toggle({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: Readonly<{ label: string; children: React.ReactNode }>) {
   return (
     <div>
       <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-brand-900/60">
@@ -519,12 +519,12 @@ function Input({
   onChange,
   type = "text",
   placeholder,
-}: {
+}: Readonly<{
   value: string;
   onChange: (v: string) => void;
   type?: string;
   placeholder?: string;
-}) {
+}>) {
   return (
     <input
       type={type}
@@ -540,11 +540,11 @@ function Textarea({
   value,
   onChange,
   rows = 3,
-}: {
+}: Readonly<{
   value: string;
   onChange: (v: string) => void;
   rows?: number;
-}) {
+}>) {
   return (
     <textarea
       rows={rows}

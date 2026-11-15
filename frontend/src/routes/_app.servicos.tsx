@@ -123,7 +123,7 @@ function ServicosPage() {
           onClose={() => setOpen(false)}
           onSave={(s) => {
             setList((prev) => {
-              const exists = prev.find((x) => x.id === s.id);
+              const exists = prev.some((x) => x.id === s.id);
               return exists ? prev.map((x) => (x.id === s.id ? s : x)) : [s, ...prev];
             });
             setOpen(false);
@@ -139,11 +139,11 @@ function ServiceModal({
   service,
   onClose,
   onSave,
-}: {
+}: Readonly<{
   service: Service | null;
   onClose: () => void;
   onSave: (s: Service) => void;
-}) {
+}>) {
   const PRESET_CATEGORIES = ["Cílios", "Sobrancelha", "Estética", "Perfuração", "Outros"];
 
   const [name, setName] = useState(service?.name ?? "");
@@ -270,7 +270,7 @@ function ServiceModal({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: Readonly<{ label: string; children: React.ReactNode }>) {
   return (
     <div>
       <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-brand-900/60">

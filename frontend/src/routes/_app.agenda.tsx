@@ -234,12 +234,12 @@ function DayView({
   refreshKey,
   onNewAt,
   onDetail,
-}: {
+}: Readonly<{
   date: Date;
   refreshKey: number;
   onNewAt: (time?: string) => void;
   onDetail: (apt: Appointment) => void;
-}) {
+}>) {
   const [items, setItems] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -299,13 +299,13 @@ function WeekView({
   onNewAt,
   onDetail,
   onDayClick,
-}: {
+}: Readonly<{
   baseDate: Date;
   refreshKey: number;
   onNewAt: (time?: string) => void;
   onDetail: (apt: Appointment) => void;
   onDayClick: (d: Date) => void;
-}) {
+}>) {
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(startOfWeek(baseDate), i));
   const [aptsByDay, setAptsByDay] = useState<Record<string, Appointment[]>>({});
   const [loading, setLoading] = useState(true);
@@ -426,12 +426,12 @@ function WeekDayColumn({
   appointments,
   onDetail,
   onDrop,
-}: {
+}: Readonly<{
   dateStr: string;
   appointments: Appointment[];
   onDetail: (apt: Appointment) => void;
   onDrop: (aptId: string, time: string, date: string) => void;
-}) {
+}>) {
   const colRef = useRef<HTMLDivElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -498,11 +498,11 @@ function MonthView({
   baseDate,
   refreshKey,
   onDayClick,
-}: {
+}: Readonly<{
   baseDate: Date;
   refreshKey: number;
   onDayClick: (d: Date) => void;
-}) {
+}>) {
   const cells = getMonthGrid(baseDate.getFullYear(), baseDate.getMonth());
   const todayISO = toISO(new Date());
   const [aptsByDay, setAptsByDay] = useState<Record<string, Appointment[]>>({});
@@ -600,13 +600,13 @@ function TimeGrid({
   onDetail,
   onUpdate,
   onDrop,
-}: {
+}: Readonly<{
   appointments: Appointment[];
   onNewAt: (time?: string) => void;
   onDetail: (apt: Appointment) => void;
   onUpdate: (apt: Appointment) => void;
   onDrop: (aptId: string, newTime: string) => void;
-}) {
+}>) {
   const gridRef = useRef<HTMLDivElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -680,11 +680,11 @@ function AptBlock({
   apt,
   onDetail,
   onUpdate,
-}: {
+}: Readonly<{
   apt: Appointment;
   onDetail: (apt: Appointment) => void;
   onUpdate: (apt: Appointment) => void;
-}) {
+}>) {
   const top = aptTop(apt.time);
   const height = aptHeight(apt.duration);
   const compact = height < 56;
@@ -751,13 +751,13 @@ function AptDetailModal({
   onUpdate,
   onEdit,
   onDelete,
-}: {
+}: Readonly<{
   apt: Appointment;
   onClose: () => void;
   onUpdate: (apt: Appointment) => void;
   onEdit: () => void;
   onDelete: () => void;
-}) {
+}>) {
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -886,13 +886,13 @@ function AppointmentModal({
   onSave,
   defaultDate,
   defaultTime,
-}: {
+}: Readonly<{
   apt?: Appointment;
   onClose: () => void;
   onSave: (apt: Appointment) => void;
   defaultDate: string;
   defaultTime?: string;
-}) {
+}>) {
   const isEdit = !!apt;
 
   const [clientId, setClientId] = useState(apt?.client_id ?? "");
@@ -1043,7 +1043,7 @@ function AppointmentModal({
 }
 
 // ── field ──────────────────────────────────────────────────
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function Field({ label, error, children }: Readonly<{ label: string; error?: string; children: React.ReactNode }>) {
   return (
     <div>
       <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-brand-900/60">{label}</label>

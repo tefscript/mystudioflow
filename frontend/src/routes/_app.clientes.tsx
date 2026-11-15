@@ -159,7 +159,7 @@ function ClientesPage() {
   );
 }
 
-function ClientModal({ onClose, onSave }: { onClose: () => void; onSave: (c: Client) => void }) {
+function ClientModal({ onClose, onSave }: Readonly<{ onClose: () => void; onSave: (c: Client) => void }>) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -252,11 +252,11 @@ function ClientDetail({
   client,
   onClose,
   onDelete,
-}: {
+}: Readonly<{
   client: Client;
   onClose: () => void;
   onDelete: (id: string) => void;
-}) {
+}>) {
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -344,13 +344,13 @@ function Input({
   onChange,
   type = "text",
   placeholder,
-}: {
+}: Readonly<{
   label: string;
   value: string;
   onChange: (v: string) => void;
   type?: string;
   placeholder?: string;
-}) {
+}>) {
   return (
     <div>
       <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-brand-900/60">

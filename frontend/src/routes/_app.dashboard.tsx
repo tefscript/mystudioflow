@@ -1,11 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PageHeader, PrimaryButton, SecondaryButton } from "@/components/AppShell";
-import { dashboardApi, authApi } from "@/lib/api";
-import type { DashboardData } from "@/lib/api";
+import { dashboardApi, authApi, appointmentsApi } from "@/lib/api";
+import type { DashboardData, Appointment } from "@/lib/api";
 import { statusStyles, statusLabels } from "@/lib/mock-data";
-import { appointmentsApi } from "@/lib/api";
-import type { Appointment } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import {
   Calendar,
@@ -16,7 +14,6 @@ import {
   ArrowRight,
   Loader2,
 } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/dashboard")({
