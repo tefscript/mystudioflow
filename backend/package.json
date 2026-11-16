@@ -28,6 +28,7 @@
     "newrelic": "^11.23.2",
     "node-cron": "^4.4.1",
     "nodemailer": "^9.0.1",
+    "tsx": "^4.19.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -40,7 +41,6 @@
     "@vitest/coverage-v8": "^4.1.11",
     "prisma": "^5.22.0",
     "supertest": "^7.2.2",
-    "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vitest": "^4.1.11"
   }
