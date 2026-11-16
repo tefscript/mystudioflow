@@ -11,7 +11,6 @@ import {
   Plus,
   Moon,
   Sun,
-  Search,
   Bell,
   Menu,
   X,
@@ -80,14 +79,6 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
             >
               <Menu className="size-5" />
             </button>
-            <div className="relative hidden md:block">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brand-900/40" />
-              <input
-                type="text"
-                placeholder="Buscar clientes, serviços..."
-                className="h-10 w-72 rounded-xl border border-border bg-card pl-9 pr-3 text-sm placeholder:text-brand-900/40 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-              />
-            </div>
           </div>
           <div className="flex items-center gap-2">
             <button
