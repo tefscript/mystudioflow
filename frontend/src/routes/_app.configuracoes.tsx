@@ -3,7 +3,16 @@ import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/AppShell";
 import { settingsApi, profileApi, whatsappApi } from "@/lib/api";
 import type { Settings, User } from "@/lib/api";
-import { User as UserIcon, MessageCircle, Bell, Sliders, Loader2, AlertCircle, CheckCircle2, WifiOff } from "lucide-react";
+import {
+  User as UserIcon,
+  MessageCircle,
+  Bell,
+  Sliders,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  WifiOff,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/configuracoes")({
@@ -189,14 +198,11 @@ function PerfilSection() {
   );
 }
 
-const DEFAULT_CONFIRMATION =
-  `Oi {nome}! Agendamento confirmado 🤎\n\n*{servico}*\n{data} às {horario}\n\nQualquer coisa é só me chamar!`;
+const DEFAULT_CONFIRMATION = `Oi {nome}! Agendamento confirmado 🤎\n\n*{servico}*\n{data} às {horario}\n\nQualquer coisa é só me chamar!`;
 
-const DEFAULT_REMINDER =
-  `Oi {nome}! Passando pra lembrar do seu horário amanhã 🤎\n\n*{servico}* às {horario}\n\nMe responde *SIM* pra confirmar ou *NÃO* pra cancelar`;
+const DEFAULT_REMINDER = `Oi {nome}! Passando pra lembrar do seu horário amanhã 🤎\n\n*{servico}* às {horario}\n\nMe responde *SIM* pra confirmar ou *NÃO* pra cancelar`;
 
-const DEFAULT_RESCHEDULE =
-  `Oi {nome}! Precisei reagendar o seu horário 🤎\n\n*{servico}*\n{data} às {horario}\n\nQualquer dúvida é só falar!`;
+const DEFAULT_RESCHEDULE = `Oi {nome}! Precisei reagendar o seu horário 🤎\n\n*{servico}*\n{data} às {horario}\n\nQualquer dúvida é só falar!`;
 
 function WhatsAppConnection() {
   const [status, setStatus] = useState<"loading" | "connected" | "disconnected">("loading");
@@ -205,7 +211,8 @@ function WhatsAppConnection() {
   const [disconnecting, setDisconnecting] = useState(false);
 
   useEffect(() => {
-    whatsappApi.getStatus()
+    whatsappApi
+      .getStatus()
       .then((s) => setStatus(s.connected ? "connected" : "disconnected"))
       .catch(() => setStatus("disconnected"));
   }, []);
@@ -222,7 +229,9 @@ function WhatsAppConnection() {
           setConnecting(false);
           toast.success("WhatsApp conectado!");
         }
-      } catch {}
+      } catch {
+        // falha pontual no polling: ignora e tenta de novo no próximo intervalo
+      }
     }, 3000);
     return () => clearInterval(id);
   }, [qr]);
@@ -238,7 +247,11 @@ function WhatsAppConnection() {
       if (!base64) {
         // pode já estar conectado
         const s = await whatsappApi.getStatus();
-        if (s.connected) { setStatus("connected"); setConnecting(false); return; }
+        if (s.connected) {
+          setStatus("connected");
+          setConnecting(false);
+          return;
+        }
         toast.error("Não foi possível gerar o QR code. Tente novamente.");
         setConnecting(false);
         return;
@@ -309,7 +322,11 @@ function WhatsAppConnection() {
       {qr && (
         <div className="mt-4 flex flex-col items-center gap-3">
           <p className="text-sm text-brand-900/60">Escaneie com o WhatsApp do celular</p>
-          <img src={qr} alt="QR Code WhatsApp" className="size-56 rounded-xl border border-border" />
+          <img
+            src={qr}
+            alt="QR Code WhatsApp"
+            className="size-56 rounded-xl border border-border"
+          />
           <p className="text-xs text-brand-900/40">Aguardando leitura...</p>
         </div>
       )}
@@ -324,7 +341,9 @@ function WhatsAppSection({
   settings: Settings;
   onChange: (s: Partial<Settings>) => void;
 }>) {
-  const [confirmation, setConfirmation] = useState(settings.wa_msg_confirmation ?? DEFAULT_CONFIRMATION);
+  const [confirmation, setConfirmation] = useState(
+    settings.wa_msg_confirmation ?? DEFAULT_CONFIRMATION,
+  );
   const [reminder, setReminder] = useState(settings.wa_msg_reminder ?? DEFAULT_REMINDER);
   const [reschedule, setReschedule] = useState(settings.wa_msg_reschedule ?? DEFAULT_RESCHEDULE);
   const [saving, setSaving] = useState(false);
@@ -371,7 +390,8 @@ function WhatsAppSection({
             <div className="mt-2 flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-700">
               <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
               <span>
-                O lembrete precisa conter <strong>SIM</strong> e <strong>NÃO</strong> para que o sistema reconheça a resposta da cliente.
+                O lembrete precisa conter <strong>SIM</strong> e <strong>NÃO</strong> para que o
+                sistema reconheça a resposta da cliente.
               </span>
             </div>
           )}
