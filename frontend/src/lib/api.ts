@@ -74,6 +74,16 @@ export interface Client {
   last_visit?: string;
 }
 
+export interface ClientHistoryItem {
+  id: string;
+  date: string;
+  time: string;
+  status: AppointmentStatus;
+  notes?: string | null;
+  service_name: string;
+  total: number;
+}
+
 export interface Service {
   id: string;
   name: string;
@@ -169,6 +179,8 @@ export const clientsApi = {
 
   get: (id: string) => req<Client>("GET", `/clients/${id}`),
 
+  history: (id: string) => req<ClientHistoryItem[]>("GET", `/clients/${id}/appointments`),
+
   create: (data: Omit<Client, "id" | "visits" | "last_visit">) =>
     req<Client>("POST", "/clients", data),
 
@@ -252,6 +264,7 @@ export const profileApi = {
 export const whatsappApi = {
   connect: () => req<{ instanceName: string }>("POST", "/whatsapp/instance", {}),
   getQrCode: () => req<{ base64?: string; code?: string }>("GET", "/whatsapp/qrcode"),
-  getStatus: () => req<{ connected: boolean; configured: boolean; state?: string }>("GET", "/whatsapp/status"),
+  getStatus: () =>
+    req<{ connected: boolean; configured: boolean; state?: string }>("GET", "/whatsapp/status"),
   deleteInstance: () => req<{ success: boolean }>("DELETE", "/whatsapp/instance"),
 };

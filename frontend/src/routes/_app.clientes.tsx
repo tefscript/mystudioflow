@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
 import { PageHeader, PrimaryButton } from "@/components/AppShell";
 import { clientsApi } from "@/lib/api";
-import type { Client } from "@/lib/api";
+import type { Client, ClientHistoryItem, AppointmentStatus } from "@/lib/api";
 import { Search, Phone, Mail, X, Loader2, MessageCircle, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
@@ -159,7 +159,10 @@ function ClientesPage() {
   );
 }
 
-function ClientModal({ onClose, onSave }: Readonly<{ onClose: () => void; onSave: (c: Client) => void }>) {
+function ClientModal({
+  onClose,
+  onSave,
+}: Readonly<{ onClose: () => void; onSave: (c: Client) => void }>) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -213,7 +216,10 @@ function ClientModal({ onClose, onSave }: Readonly<{ onClose: () => void; onSave
             placeholder="email@exemplo.com"
           />
           <div>
-            <label htmlFor="notes" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-brand-900/60">
+            <label
+              htmlFor="notes"
+              className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-brand-900/60"
+            >
               Observações
             </label>
             <textarea
@@ -258,6 +264,14 @@ function ClientDetail({
   onDelete: (id: string) => void;
 }>) {
   const [deleting, setDeleting] = useState(false);
+  const [history, setHistory] = useState<ClientHistoryItem[] | null>(null);
+
+  useEffect(() => {
+    clientsApi
+      .history(client.id)
+      .then(setHistory)
+      .catch(() => setHistory([]));
+  }, [client.id]);
 
   const handleDelete = async () => {
     if (!confirm(`Remover ${client.name}?`)) return;
@@ -316,6 +330,44 @@ function ClientDetail({
           )}
         </div>
 
+        <div className="mt-6">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-brand-900/60">
+            Histórico de atendimentos
+          </p>
+          {history === null ? (
+            <div className="flex justify-center py-4 text-brand-900/40">
+              <Loader2 className="size-5 animate-spin" />
+            </div>
+          ) : history.length === 0 ? (
+            <p className="rounded-xl bg-brand-50 p-4 text-sm text-brand-900/50">
+              Nenhum atendimento ainda.
+            </p>
+          ) : (
+            <ul className="max-h-56 space-y-2 overflow-y-auto pr-1">
+              {history.map((h) => (
+                <li
+                  key={h.id}
+                  className="flex items-center justify-between gap-3 rounded-xl bg-brand-50 p-3"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">
+                      {h.service_name || "Atendimento"}
+                    </p>
+                    <p className="text-xs text-brand-900/50">
+                      {formatDate(h.date)} às {h.time} · R$ {h.total.toFixed(2).replace(".", ",")}
+                    </p>
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${STATUS_STYLE[h.status] ?? ""}`}
+                  >
+                    {STATUS_LABEL[h.status] ?? h.status}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         <div className="mt-6 flex gap-3">
           <a
             href={buildWhatsAppLink(client.phone, `Oi, ${client.name.split(" ")[0]}! 💕`)}
@@ -336,6 +388,25 @@ function ClientDetail({
       </div>
     </div>
   );
+}
+
+const STATUS_LABEL: Record<AppointmentStatus, string> = {
+  aguardando: "Aguardando",
+  confirmado: "Confirmado",
+  concluido: "Concluído",
+  cancelado: "Cancelado",
+};
+
+const STATUS_STYLE: Record<AppointmentStatus, string> = {
+  aguardando: "bg-amber-100 text-amber-700",
+  confirmado: "bg-emerald-100 text-emerald-700",
+  concluido: "bg-brand-100 text-brand-600",
+  cancelado: "bg-rose-100 text-rose-600",
+};
+
+function formatDate(iso: string) {
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
 }
 
 function Input({

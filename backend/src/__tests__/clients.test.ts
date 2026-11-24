@@ -71,6 +71,45 @@ describe("GET /api/clients/:id", () => {
   });
 });
 
+describe("GET /api/clients/:id/appointments", () => {
+  it("retorna o historico da cliente com servicos e total", async () => {
+    vi.mocked(prisma.client.findFirst).mockResolvedValue(mockClient as any);
+    vi.mocked(prisma.appointment.findMany).mockResolvedValue([
+      {
+        id: "apt-1",
+        date: "2026-08-01",
+        time: "14:00",
+        status: "concluido",
+        notes: null,
+        services: [
+          { service: { name: "Cílios", price: 150 } },
+          { service: { name: "Sobrancelha", price: 40 } },
+        ],
+      },
+    ] as any);
+
+    const res = await request(app).get("/api/clients/client-1/appointments").set(AUTH());
+
+    expect(res.status).toBe(200);
+    expect(res.body[0].service_name).toBe("Cílios + Sobrancelha");
+    expect(res.body[0].total).toBe(190);
+    expect(prisma.appointment.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { clientId: "client-1", userId: "user-1" },
+      })
+    );
+  });
+
+  it("retorna 404 se a cliente for de outra usuaria", async () => {
+    vi.mocked(prisma.client.findFirst).mockResolvedValue(null);
+
+    const res = await request(app).get("/api/clients/client-2/appointments").set(AUTH());
+
+    expect(res.status).toBe(404);
+    expect(prisma.appointment.findMany).not.toHaveBeenCalled();
+  });
+});
+
 describe("POST /api/clients", () => {
   it("cria cliente com dados válidos", async () => {
     vi.mocked(prisma.client.create).mockResolvedValue(mockClient as any);
