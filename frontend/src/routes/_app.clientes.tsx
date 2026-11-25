@@ -11,6 +11,13 @@ export const Route = createFileRoute("/_app/clientes")({
   component: ClientesPage,
 });
 
+type SortOption = "name" | "visits_desc" | "visits_asc";
+
+// minusculo e sem acento, pra "jose" achar "José"
+function normalize(text: string): string {
+  return text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+
 function ClientesPage() {
   const [list, setList] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,16 +33,46 @@ function ClientesPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = useMemo(
-    () =>
-      list.filter(
-        (c) =>
-          c.name.toLowerCase().includes(q.toLowerCase()) ||
-          c.phone.includes(q) ||
-          c.email?.toLowerCase().includes(q.toLowerCase()),
-      ),
-    [list, q],
-  );
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [sort, setSort] = useState<SortOption>("name");
+  const [onlyWithEmail, setOnlyWithEmail] = useState(false);
+  const [onlyNoVisits, setOnlyNoVisits] = useState(false);
+
+  const activeFilters =
+    (sort !== "name" ? 1 : 0) + (onlyWithEmail ? 1 : 0) + (onlyNoVisits ? 1 : 0);
+
+  const filtered = useMemo(() => {
+    const term = normalize(q.trim());
+    const termDigits = q.replace(/\D/g, "");
+    const isNumeric = termDigits.length > 0 && /^[\d\s()+-]+$/.test(q.trim());
+
+    const result = list.filter((c) => {
+      if (onlyWithEmail && !c.email) return false;
+      if (onlyNoVisits && c.visits > 0) return false;
+      if (!term) return true;
+      return (
+        // nome: alguma palavra do nome comeca com o que foi digitado ("ste" acha "Stefani")
+        normalize(c.name)
+          .split(/\s+/)
+          .some((word) => word.startsWith(term)) ||
+        normalize(c.email ?? "").startsWith(term) ||
+        // telefone so quando digitou numeros, comparando so os digitos
+        (isNumeric && c.phone.replace(/\D/g, "").includes(termDigits))
+      );
+    });
+
+    return [...result].sort((a, b) => {
+      if (sort === "visits_desc") return b.visits - a.visits;
+      if (sort === "visits_asc") return a.visits - b.visits;
+      return a.name.localeCompare(b.name, "pt-BR");
+    });
+  }, [list, q, sort, onlyWithEmail, onlyNoVisits]);
+
+  function clearFilters() {
+    setSort("name");
+    setOnlyWithEmail(false);
+    setOnlyNoVisits(false);
+  }
 
   return (
     <div className="mx-auto max-w-7xl">
@@ -55,9 +92,74 @@ function ClientesPage() {
             className="h-12 w-full rounded-2xl border border-border bg-card pl-11 pr-4 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
           />
         </div>
-        <button className="flex h-12 items-center justify-center gap-2 rounded-2xl border border-border bg-card px-5 text-sm font-semibold hover:bg-brand-100">
-          <Filter className="size-4" /> Filtros
-        </button>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            aria-expanded={filtersOpen}
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card px-5 text-sm font-semibold hover:bg-brand-100"
+          >
+            <Filter className="size-4" /> Filtros
+            {activeFilters > 0 && (
+              <span className="rounded-full bg-brand-500 px-2 text-xs text-white">
+                {activeFilters}
+              </span>
+            )}
+          </button>
+          {filtersOpen && (
+            <div className="absolute right-0 z-20 mt-2 w-full min-w-64 rounded-2xl border border-border bg-card p-4 shadow-lg sm:w-72">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-brand-900/60">
+                Ordenar por
+              </p>
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortOption)}
+                className="mb-4 h-10 w-full rounded-xl border border-border bg-card px-3 text-sm focus:border-brand-500 focus:outline-none"
+              >
+                <option value="name">Nome (A a Z)</option>
+                <option value="visits_desc">Mais visitas</option>
+                <option value="visits_asc">Menos visitas</option>
+              </select>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-brand-900/60">
+                Mostrar só
+              </p>
+              <label className="mb-2 flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={onlyWithEmail}
+                  onChange={(e) => setOnlyWithEmail(e.target.checked)}
+                  className="size-4 accent-brand-500"
+                />
+                Com e-mail cadastrado
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={onlyNoVisits}
+                  onChange={(e) => setOnlyNoVisits(e.target.checked)}
+                  className="size-4 accent-brand-500"
+                />
+                Sem visitas ainda
+              </label>
+              <div className="mt-4 flex justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="text-xs font-semibold text-brand-600 hover:underline"
+                >
+                  Limpar filtros
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFiltersOpen(false)}
+                  className="rounded-xl bg-brand-500 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-600"
+                >
+                  Aplicar
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {loading ? (
@@ -67,7 +169,11 @@ function ClientesPage() {
       ) : filtered.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-border bg-card p-12 text-center">
           <p className="font-serif text-lg">Nenhuma cliente encontrada</p>
-          <p className="mt-1 text-sm text-brand-900/50">Tente outro termo de busca.</p>
+          <p className="mt-1 text-sm text-brand-900/50">
+            {activeFilters > 0
+              ? "Tente outro termo de busca ou limpe os filtros."
+              : "Tente outro termo de busca."}
+          </p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">

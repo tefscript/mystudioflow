@@ -15,6 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { buildWhatsAppLink } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/_app/dashboard")({
   component: Dashboard,
@@ -180,12 +181,19 @@ function Dashboard() {
                     >
                       {statusLabels[a.status]}
                     </span>
-                    <button
-                      onClick={() => toast.success("Abrindo WhatsApp...")}
-                      className="flex items-center gap-1 text-xs font-semibold text-brand-600/70 hover:text-brand-600"
-                    >
-                      <MessageCircle className="size-3" /> WhatsApp
-                    </button>
+                    {a.client_phone && (
+                      <a
+                        href={buildWhatsAppLink(
+                          a.client_phone,
+                          `Oi, ${a.client_name.split(" ")[0]}! 💕`,
+                        )}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1 text-xs font-semibold text-brand-600/70 hover:text-brand-600"
+                      >
+                        <MessageCircle className="size-3" /> WhatsApp
+                      </a>
+                    )}
                   </div>
                 </div>
               ))}
