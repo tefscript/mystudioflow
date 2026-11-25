@@ -72,7 +72,8 @@ router.post("/webhook", async (req: Request, res: Response): Promise<void> => {
 
       if (!appointment) continue;
 
-      const newStatus = isConfirm ? "confirmado" : "cancelado";
+      // cancelamento tem prioridade: "não vou poder ir" tem "vou" e "nao", e tem que cancelar
+      const newStatus = isCancel ? "cancelado" : "confirmado";
       await prisma.appointment.update({ where: { id: appointment.id }, data: { status: newStatus } });
 
       const hora = appointment.time;
