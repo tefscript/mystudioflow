@@ -4,7 +4,18 @@ import { PageHeader, PrimaryButton } from "@/components/AppShell";
 import { statusLabels, statusStyles } from "@/lib/mock-data";
 import { appointmentsApi, clientsApi, servicesApi } from "@/lib/api";
 import type { Appointment, Client, Service } from "@/lib/api";
-import { ChevronLeft, ChevronRight, Loader2, Phone, X, Calendar, Clock, User, Pencil, Trash2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Phone,
+  X,
+  Calendar,
+  Clock,
+  User,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +31,20 @@ const END_H = 24;
 const HOURS = Array.from({ length: END_H - START_H }, (_, i) => START_H + i);
 const TOTAL_H = HOURS.length * HOUR_H + 16;
 const WEEK_LABELS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
-const MONTH_NAMES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const MONTH_NAMES = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+];
 const SNAP_MIN = 15; // snap de 15 em 15 minutos
 
 // ── helpers ────────────────────────────────────────────────
@@ -33,7 +57,7 @@ function toISO(d: Date) {
 
 function aptTop(time: string) {
   const [h, m] = time.split(":").map(Number);
-  return 16 + (h * 60 + m) / 60 * HOUR_H;
+  return 16 + ((h * 60 + m) / 60) * HOUR_H;
 }
 
 function aptHeight(duration: number) {
@@ -72,7 +96,7 @@ function formatDate(dateStr: string) {
 
 // converte offsetY dentro do grid em horário snapped
 function pxToTime(py: number): string {
-  const totalMin = Math.max(0, Math.min((py - 16) / HOUR_H * 60, END_H * 60 - SNAP_MIN));
+  const totalMin = Math.max(0, Math.min(((py - 16) / HOUR_H) * 60, END_H * 60 - SNAP_MIN));
   const snapped = Math.round(totalMin / SNAP_MIN) * SNAP_MIN;
   const h = Math.floor(snapped / 60);
   const m = snapped % 60;
@@ -97,11 +121,12 @@ function AgendaPage() {
   function navigate(dir: -1 | 1) {
     if (view === "day") setBaseDate((d) => addDays(d, dir));
     else if (view === "week") setBaseDate((d) => addDays(d, dir * 7));
-    else setBaseDate((d) => {
-      const r = new Date(d);
-      r.setMonth(r.getMonth() + dir);
-      return r;
-    });
+    else
+      setBaseDate((d) => {
+        const r = new Date(d);
+        r.setMonth(r.getMonth() + dir);
+        return r;
+      });
   }
 
   function openNew(time?: string) {
@@ -113,12 +138,12 @@ function AgendaPage() {
     view === "day"
       ? baseDate.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })
       : view === "week"
-      ? (() => {
-          const mon = startOfWeek(baseDate);
-          const sun = addDays(mon, 6);
-          return `${mon.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })} – ${sun.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}`;
-        })()
-      : `${MONTH_NAMES[baseDate.getMonth()]} ${baseDate.getFullYear()}`;
+        ? (() => {
+            const mon = startOfWeek(baseDate);
+            const sun = addDays(mon, 6);
+            return `${mon.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })} – ${sun.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}`;
+          })()
+        : `${MONTH_NAMES[baseDate.getMonth()]} ${baseDate.getFullYear()}`;
 
   return (
     <div className="mx-auto max-w-7xl">
@@ -137,7 +162,9 @@ function AgendaPage() {
               onClick={() => setView(v)}
               className={cn(
                 "rounded-lg px-4 py-1.5 text-sm font-semibold transition-all",
-                view === v ? "bg-white shadow text-brand-700" : "text-brand-900/50 hover:text-brand-700"
+                view === v
+                  ? "bg-white shadow text-[#4a3733]"
+                  : "text-brand-900/50 hover:text-brand-700",
               )}
             >
               {v === "day" ? "Dia" : v === "week" ? "Semana" : "Mês"}
@@ -149,7 +176,9 @@ function AgendaPage() {
           <button onClick={() => navigate(-1)} className="rounded-xl p-2 hover:bg-brand-100">
             <ChevronLeft className="size-4" />
           </button>
-          <p className="min-w-52 text-center font-serif text-base font-semibold capitalize">{navLabel}</p>
+          <p className="min-w-52 text-center font-serif text-base font-semibold capitalize">
+            {navLabel}
+          </p>
           <button onClick={() => navigate(1)} className="rounded-xl p-2 hover:bg-brand-100">
             <ChevronRight className="size-4" />
           </button>
@@ -176,14 +205,20 @@ function AgendaPage() {
           refreshKey={newAptSaved}
           onNewAt={openNew}
           onDetail={setDetailApt}
-          onDayClick={(d) => { setBaseDate(d); setView("day"); }}
+          onDayClick={(d) => {
+            setBaseDate(d);
+            setView("day");
+          }}
         />
       )}
       {view === "month" && (
         <MonthView
           baseDate={baseDate}
           refreshKey={newAptSaved}
-          onDayClick={(d) => { setBaseDate(d); setView("day"); }}
+          onDayClick={(d) => {
+            setBaseDate(d);
+            setView("day");
+          }}
         />
       )}
 
@@ -195,7 +230,9 @@ function AgendaPage() {
           onSave={(apt) => {
             setModalOpen(false);
             setNewAptSaved((n) => n + 1);
-            toast.success("Agendamento criado!", { description: `${apt.client_name} às ${apt.time}` });
+            toast.success("Agendamento criado!", {
+              description: `${apt.client_name} às ${apt.time}`,
+            });
           }}
         />
       )}
@@ -220,8 +257,14 @@ function AgendaPage() {
           apt={detailApt}
           onClose={() => setDetailApt(null)}
           onUpdate={(updated) => setDetailApt(updated)}
-          onEdit={() => { setEditApt(detailApt); setDetailApt(null); }}
-          onDelete={() => { setDetailApt(null); setNewAptSaved((n) => n + 1); }}
+          onEdit={() => {
+            setEditApt(detailApt);
+            setDetailApt(null);
+          }}
+          onDelete={() => {
+            setDetailApt(null);
+            setNewAptSaved((n) => n + 1);
+          }}
         />
       )}
     </div>
@@ -259,17 +302,20 @@ function DayView({
     }
   }, [loading]);
 
-  const handleDrop = useCallback(async (aptId: string, newTime: string) => {
-    const apt = items.find((a) => a.id === aptId);
-    if (!apt || apt.time === newTime) return;
-    try {
-      const updated = await appointmentsApi.update(aptId, { time: newTime });
-      setItems((prev) => prev.map((a) => (a.id === aptId ? updated : a)));
-      toast.success(`Horário alterado para ${newTime}`);
-    } catch {
-      toast.error("Erro ao mover agendamento");
-    }
-  }, [items]);
+  const handleDrop = useCallback(
+    async (aptId: string, newTime: string) => {
+      const apt = items.find((a) => a.id === aptId);
+      if (!apt || apt.time === newTime) return;
+      try {
+        const updated = await appointmentsApi.update(aptId, { time: newTime });
+        setItems((prev) => prev.map((a) => (a.id === aptId ? updated : a)));
+        toast.success(`Horário alterado para ${newTime}`);
+      } catch {
+        toast.error("Erro ao mover agendamento");
+      }
+    },
+    [items],
+  );
 
   return (
     <div className="rounded-3xl border border-border bg-card shadow-sm overflow-hidden">
@@ -283,7 +329,9 @@ function DayView({
             appointments={items}
             onNewAt={onNewAt}
             onDetail={onDetail}
-            onUpdate={(updated) => setItems((prev) => prev.map((a) => (a.id === updated.id ? updated : a)))}
+            onUpdate={(updated) =>
+              setItems((prev) => prev.map((a) => (a.id === updated.id ? updated : a)))
+            }
             onDrop={handleDrop}
           />
         </div>
@@ -313,10 +361,16 @@ function WeekView({
 
   useEffect(() => {
     setLoading(true);
-    Promise.all(weekDays.map((d) => appointmentsApi.list({ date: toISO(d) }).then((apts) => ({ date: toISO(d), apts }))))
+    Promise.all(
+      weekDays.map((d) =>
+        appointmentsApi.list({ date: toISO(d) }).then((apts) => ({ date: toISO(d), apts })),
+      ),
+    )
       .then((results) => {
         const map: Record<string, Appointment[]> = {};
-        results.forEach(({ date, apts }) => { map[date] = apts; });
+        results.forEach(({ date, apts }) => {
+          map[date] = apts;
+        });
         setAptsByDay(map);
       })
       .catch(() => toast.error("Erro ao carregar semana"))
@@ -329,28 +383,35 @@ function WeekView({
     }
   }, [loading]);
 
-  const handleDrop = useCallback(async (aptId: string, newTime: string, newDate: string) => {
-    // encontra em qual dia está
-    let sourceDate = "";
-    let apt: Appointment | undefined;
-    for (const [d, apts] of Object.entries(aptsByDay)) {
-      const found = apts.find((a) => a.id === aptId);
-      if (found) { apt = found; sourceDate = d; break; }
-    }
-    if (!apt || (apt.time === newTime && sourceDate === newDate)) return;
-    try {
-      const updated = await appointmentsApi.update(aptId, { time: newTime, date: newDate });
-      setAptsByDay((prev) => {
-        const next = { ...prev };
-        if (next[sourceDate]) next[sourceDate] = next[sourceDate].filter((a) => a.id !== aptId);
-        next[newDate] = [...(next[newDate] ?? []), updated];
-        return next;
-      });
-      toast.success(`Movido para ${formatDate(newDate)} às ${newTime}`);
-    } catch {
-      toast.error("Erro ao mover agendamento");
-    }
-  }, [aptsByDay]);
+  const handleDrop = useCallback(
+    async (aptId: string, newTime: string, newDate: string) => {
+      // encontra em qual dia está
+      let sourceDate = "";
+      let apt: Appointment | undefined;
+      for (const [d, apts] of Object.entries(aptsByDay)) {
+        const found = apts.find((a) => a.id === aptId);
+        if (found) {
+          apt = found;
+          sourceDate = d;
+          break;
+        }
+      }
+      if (!apt || (apt.time === newTime && sourceDate === newDate)) return;
+      try {
+        const updated = await appointmentsApi.update(aptId, { time: newTime, date: newDate });
+        setAptsByDay((prev) => {
+          const next = { ...prev };
+          if (next[sourceDate]) next[sourceDate] = next[sourceDate].filter((a) => a.id !== aptId);
+          next[newDate] = [...(next[newDate] ?? []), updated];
+          return next;
+        });
+        toast.success(`Movido para ${formatDate(newDate)} às ${newTime}`);
+      } catch {
+        toast.error("Erro ao mover agendamento");
+      }
+    },
+    [aptsByDay],
+  );
 
   return (
     <div className="rounded-3xl border border-border bg-card shadow-sm overflow-hidden overflow-x-auto">
@@ -371,14 +432,16 @@ function WeekView({
                   onClick={() => onDayClick(d)}
                   className={cn(
                     "flex-1 py-3 text-center text-xs font-semibold border-l border-border hover:bg-brand-50 transition-colors",
-                    isToday(d) ? "text-brand-600 bg-brand-50" : "text-brand-900/60"
+                    isToday(d) ? "text-brand-600 bg-brand-50" : "text-brand-900/60",
                   )}
                 >
                   <span className="block uppercase tracking-wider">{WEEK_LABELS[i]}</span>
-                  <span className={cn(
-                    "mt-1 inline-flex size-6 items-center justify-center rounded-full font-serif text-sm",
-                    isToday(d) ? "bg-brand-500 text-white" : ""
-                  )}>
+                  <span
+                    className={cn(
+                      "mt-1 inline-flex size-6 items-center justify-center rounded-full font-serif text-sm",
+                      isToday(d) ? "bg-brand-500 text-white" : "",
+                    )}
+                  >
                     {d.getDate()}
                   </span>
                 </button>
@@ -394,7 +457,9 @@ function WeekView({
                     style={{ position: "absolute", top: 16 + i * HOUR_H, right: 8, left: 0 }}
                     className="flex justify-end"
                   >
-                    <span className="text-[10px] font-semibold text-brand-900/40 leading-none">{String(h).padStart(2, "0")}:00</span>
+                    <span className="text-[10px] font-semibold text-brand-900/40 leading-none">
+                      {String(h).padStart(2, "0")}:00
+                    </span>
                   </div>
                 ))}
               </div>
@@ -485,7 +550,9 @@ function WeekDayColumn({
           onClick={() => onDetail(apt)}
           title={`${apt.client_name} — ${apt.service_name}`}
         >
-          <p className="truncate text-[10px] font-bold text-brand-700">{apt.time} {apt.client_name}</p>
+          <p className="truncate text-[10px] font-bold text-brand-700">
+            {apt.time} {apt.client_name}
+          </p>
           <p className="truncate text-[9px] text-brand-600/70">{apt.service_name}</p>
         </div>
       ))}
@@ -512,11 +579,15 @@ function MonthView({
     setLoading(true);
     const days = cells.filter(Boolean) as Date[];
     Promise.all(
-      days.map((d) => appointmentsApi.list({ date: toISO(d) }).then((apts) => ({ date: toISO(d), apts })))
+      days.map((d) =>
+        appointmentsApi.list({ date: toISO(d) }).then((apts) => ({ date: toISO(d), apts })),
+      ),
     )
       .then((results) => {
         const map: Record<string, Appointment[]> = {};
-        results.forEach(({ date, apts }) => { map[date] = apts; });
+        results.forEach(({ date, apts }) => {
+          map[date] = apts;
+        });
         setAptsByDay(map);
       })
       .catch(() => {})
@@ -534,7 +605,10 @@ function MonthView({
     <div className="rounded-3xl border border-border bg-card shadow-sm overflow-hidden">
       <div className="grid grid-cols-7 border-b border-border">
         {WEEK_LABELS.map((l) => (
-          <div key={l} className="py-3 text-center text-xs font-semibold uppercase tracking-wider text-brand-900/40">
+          <div
+            key={l}
+            className="py-3 text-center text-xs font-semibold uppercase tracking-wider text-brand-900/40"
+          >
             {l}
           </div>
         ))}
@@ -554,15 +628,17 @@ function MonthView({
               className={cn(
                 "min-h-[80px] border-b border-r border-border p-2 transition-colors",
                 d ? "cursor-pointer hover:bg-brand-50" : "bg-background/40",
-                !isCurMonth && d ? "opacity-30" : ""
+                !isCurMonth && d ? "opacity-30" : "",
               )}
             >
               {d && (
                 <>
-                  <span className={cn(
-                    "inline-flex size-7 items-center justify-center rounded-full font-serif text-sm font-semibold",
-                    isT ? "bg-brand-500 text-white" : "text-brand-900/70"
-                  )}>
+                  <span
+                    className={cn(
+                      "inline-flex size-7 items-center justify-center rounded-full font-serif text-sm font-semibold",
+                      isT ? "bg-brand-500 text-white" : "text-brand-900/70",
+                    )}
+                  >
                     {d.getDate()}
                   </span>
                   {!loading && dayApts.length > 0 && (
@@ -572,14 +648,16 @@ function MonthView({
                           key={apt.id}
                           className={cn(
                             "inline-block truncate max-w-full rounded px-1 py-0.5 text-[9px] font-semibold",
-                            statusChip[apt.status] ?? "bg-brand-500 text-white"
+                            statusChip[apt.status] ?? "bg-brand-500 text-white",
                           )}
                         >
                           {apt.time} {apt.client_name.split(" ")[0]}
                         </span>
                       ))}
                       {dayApts.length > 3 && (
-                        <span className="text-[9px] text-brand-900/40 font-semibold">+{dayApts.length - 3}</span>
+                        <span className="text-[9px] text-brand-900/40 font-semibold">
+                          +{dayApts.length - 3}
+                        </span>
                       )}
                     </div>
                   )}
@@ -634,7 +712,9 @@ function TimeGrid({
             style={{ position: "absolute", top: 16 + i * HOUR_H, right: 0, left: 0 }}
             className="flex justify-end pr-3"
           >
-            <span className="text-xs font-semibold text-brand-900/40 leading-none">{String(h).padStart(2, "0")}:00</span>
+            <span className="text-xs font-semibold text-brand-900/40 leading-none">
+              {String(h).padStart(2, "0")}:00
+            </span>
           </div>
         ))}
       </div>
@@ -656,7 +736,13 @@ function TimeGrid({
               key={h}
               role="button"
               tabIndex={0}
-              style={{ position: "absolute", top: 16 + i * HOUR_H, left: 0, right: 0, height: HOUR_H }}
+              style={{
+                position: "absolute",
+                top: 16 + i * HOUR_H,
+                left: 0,
+                right: 0,
+                height: HOUR_H,
+              }}
               className="border-t border-border/60 group cursor-pointer hover:bg-brand-50 transition-colors"
               onClick={() => onNewAt(hStr)}
             >
@@ -705,27 +791,41 @@ function AptBlock({
     >
       <div className="flex h-full items-start justify-between gap-2 px-4 py-2">
         <div className="flex min-w-0 items-center gap-3">
-          <div className={cn(
-            "shrink-0 flex items-center justify-center rounded-full bg-brand-200 font-serif font-semibold text-brand-700",
-            compact ? "size-7 text-xs" : "size-10 text-sm"
-          )}>
+          <div
+            className={cn(
+              "shrink-0 flex items-center justify-center rounded-full bg-brand-200 font-serif font-semibold text-brand-700",
+              compact ? "size-7 text-xs" : "size-10 text-sm",
+            )}
+          >
             {apt.clientInitials}
           </div>
           <div className="min-w-0">
-            <p className={cn("font-semibold truncate", compact ? "text-xs" : "text-sm")}>{apt.client_name}</p>
+            <p className={cn("font-semibold truncate", compact ? "text-xs" : "text-sm")}>
+              {apt.client_name}
+            </p>
             {!compact && (
-              <p className="truncate text-xs text-brand-900/50">{apt.service_name} • {apt.duration} min</p>
+              <p className="truncate text-xs text-brand-900/50">
+                {apt.service_name} • {apt.duration} min
+              </p>
             )}
           </div>
         </div>
-        <div className={cn("flex shrink-0 items-center gap-2", compact ? "flex-row" : "flex-col items-end")}>
+        <div
+          className={cn(
+            "flex shrink-0 items-center gap-2",
+            compact ? "flex-row" : "flex-col items-end",
+          )}
+        >
           <select
             value={apt.status}
             onClick={(e) => e.stopPropagation()}
             onChange={async (e) => {
               e.stopPropagation();
               try {
-                const updated = await appointmentsApi.setStatus(apt.id, e.target.value as Appointment["status"]);
+                const updated = await appointmentsApi.setStatus(
+                  apt.id,
+                  e.target.value as Appointment["status"],
+                );
                 onUpdate(updated);
                 toast.success("Status atualizado!");
               } catch {
@@ -735,7 +835,9 @@ function AptBlock({
             className={`rounded-full border-0 px-2 py-0.5 text-[9px] font-bold uppercase cursor-pointer ${statusStyles[apt.status]}`}
           >
             {(["confirmado", "aguardando", "concluido", "cancelado"] as const).map((s) => (
-              <option key={s} value={s}>{statusLabels[s]}</option>
+              <option key={s} value={s}>
+                {statusLabels[s]}
+              </option>
             ))}
           </select>
         </div>
@@ -762,7 +864,10 @@ function AptDetailModal({
   const [deleting, setDeleting] = useState(false);
 
   async function handleDelete() {
-    if (!confirming) { setConfirming(true); return; }
+    if (!confirming) {
+      setConfirming(true);
+      return;
+    }
     setDeleting(true);
     try {
       await appointmentsApi.delete(apt.id);
@@ -793,7 +898,9 @@ function AptDetailModal({
               )}
             </div>
           </div>
-          <button onClick={onClose} className="rounded-xl p-2 hover:bg-brand-100"><X className="size-4" /></button>
+          <button onClick={onClose} className="rounded-xl p-2 hover:bg-brand-100">
+            <X className="size-4" />
+          </button>
         </div>
 
         {/* Info */}
@@ -804,7 +911,9 @@ function AptDetailModal({
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Clock className="size-4 text-brand-400 shrink-0" />
-            <span className="text-brand-900/70">{apt.time} • {apt.duration} min</span>
+            <span className="text-brand-900/70">
+              {apt.time} • {apt.duration} min
+            </span>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <User className="size-4 text-brand-400 shrink-0" />
@@ -817,7 +926,9 @@ function AptDetailModal({
 
         {/* Status */}
         <div className="mt-4">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-brand-900/50">Status</p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-brand-900/50">
+            Status
+          </p>
           <div className="grid grid-cols-2 gap-2">
             {(["confirmado", "aguardando", "concluido", "cancelado"] as const).map((s) => (
               <button
@@ -835,7 +946,7 @@ function AptDetailModal({
                   "rounded-xl py-2.5 text-xs font-bold uppercase transition-all",
                   apt.status === s
                     ? statusStyles[s] + " ring-2 ring-offset-1 ring-brand-400"
-                    : "bg-brand-50 text-brand-900/40 hover:bg-brand-100"
+                    : "bg-brand-50 text-brand-900/40 hover:bg-brand-100",
                 )}
               >
                 {statusLabels[s]}
@@ -859,7 +970,7 @@ function AptDetailModal({
               "flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-colors",
               confirming
                 ? "bg-rose-500 text-white hover:bg-rose-600"
-                : "border border-border hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200"
+                : "border border-border hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200",
             )}
           >
             {deleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
@@ -897,7 +1008,7 @@ function AppointmentModal({
 
   const [clientId, setClientId] = useState(apt?.client_id ?? "");
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>(
-    apt?.services?.map((s) => s.id) ?? []
+    apt?.services?.map((s) => s.id) ?? [],
   );
   const [date, setDate] = useState(apt?.date ?? defaultDate);
   const [time, setTime] = useState(apt?.time ?? defaultTime ?? "");
@@ -908,13 +1019,19 @@ function AppointmentModal({
   const [services, setServices] = useState<Service[]>([]);
 
   useEffect(() => {
-    clientsApi.list().then(setClients).catch(() => toast.error("Erro ao carregar clientes"));
-    servicesApi.list().then(setServices).catch(() => toast.error("Erro ao carregar serviços"));
+    clientsApi
+      .list()
+      .then(setClients)
+      .catch(() => toast.error("Erro ao carregar clientes"));
+    servicesApi
+      .list()
+      .then(setServices)
+      .catch(() => toast.error("Erro ao carregar serviços"));
   }, []);
 
   function toggleService(id: string) {
     setSelectedServiceIds((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
     );
   }
 
@@ -943,7 +1060,13 @@ function AppointmentModal({
           notes,
         });
       } else {
-        result = await appointmentsApi.create({ client_id: clientId, service_ids: selectedServiceIds, date, time, notes });
+        result = await appointmentsApi.create({
+          client_id: clientId,
+          service_ids: selectedServiceIds,
+          date,
+          time,
+          notes,
+        });
       }
       onSave(result);
     } catch (err) {
@@ -958,17 +1081,28 @@ function AppointmentModal({
       <div className="w-full max-w-lg animate-float-in rounded-t-3xl bg-card p-6 shadow-2xl md:rounded-3xl md:p-8 max-h-[90vh] overflow-y-auto">
         <div className="mb-6 flex items-start justify-between">
           <div>
-            <h2 className="font-serif text-2xl font-semibold">{isEdit ? "Editar agendamento" : "Novo agendamento"}</h2>
+            <h2 className="font-serif text-2xl font-semibold">
+              {isEdit ? "Editar agendamento" : "Novo agendamento"}
+            </h2>
             <p className="mt-1 text-sm text-brand-900/50">Preencha os dados abaixo.</p>
           </div>
-          <button onClick={onClose} className="rounded-xl p-2 hover:bg-brand-100"><X className="size-4" /></button>
+          <button onClick={onClose} className="rounded-xl p-2 hover:bg-brand-100">
+            <X className="size-4" />
+          </button>
         </div>
         <form onSubmit={submit} className="space-y-4">
           <Field label="Cliente" error={errors.client}>
-            <select value={clientId} onChange={(e) => setClientId(e.target.value)}
-              className="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+            <select
+              value={clientId}
+              onChange={(e) => setClientId(e.target.value)}
+              className="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+            >
               <option value="">Selecione uma cliente</option>
-              {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              {clients.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
             </select>
           </Field>
 
@@ -980,10 +1114,14 @@ function AppointmentModal({
                 services.map((s) => {
                   const checked = selectedServiceIds.includes(s.id);
                   return (
-                    <label key={s.id} htmlFor={`service-${s.id}`} className={cn(
-                      "flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors",
-                      checked ? "bg-brand-50" : "hover:bg-brand-50/50"
-                    )}>
+                    <label
+                      key={s.id}
+                      htmlFor={`service-${s.id}`}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors",
+                        checked ? "bg-brand-50" : "hover:bg-brand-50/50",
+                      )}
+                    >
                       <input
                         id={`service-${s.id}`}
                         type="checkbox"
@@ -993,7 +1131,10 @@ function AppointmentModal({
                       />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{s.name}</p>
-                        <p className="text-xs text-brand-900/50">{s.duration} min • R$ {Number(s.price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
+                        <p className="text-xs text-brand-900/50">
+                          {s.duration} min • R${" "}
+                          {Number(s.price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        </p>
                       </div>
                     </label>
                   );
@@ -1002,36 +1143,59 @@ function AppointmentModal({
             </div>
             {selectedServices.length > 0 && (
               <div className="mt-2 flex items-center justify-between rounded-lg bg-brand-100 px-3 py-2 text-xs font-semibold text-brand-700">
-                <span>{selectedServices.length} procedimento{selectedServices.length > 1 ? "s" : ""}</span>
-                <span>{totalDuration} min • R$ {totalPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                <span>
+                  {selectedServices.length} procedimento{selectedServices.length > 1 ? "s" : ""}
+                </span>
+                <span>
+                  {totalDuration} min • R${" "}
+                  {totalPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                </span>
               </div>
             )}
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Data" error={errors.date}>
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-                className="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20" />
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+              />
             </Field>
             <Field label="Horário" error={errors.time}>
-              <input type="time" value={time} onChange={(e) => setTime(e.target.value)}
-                className="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20" />
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+              />
             </Field>
           </div>
 
           <Field label="Observações">
-            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2}
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={2}
               placeholder="Ex: preferências, alergias, indicação..."
-              className="w-full rounded-xl border border-border bg-card p-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20" />
+              className="w-full rounded-xl border border-border bg-card p-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+            />
           </Field>
 
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose}
-              className="h-11 flex-1 rounded-xl border border-border bg-card text-sm font-semibold hover:bg-brand-100">
+            <button
+              type="button"
+              onClick={onClose}
+              className="h-11 flex-1 rounded-xl border border-border bg-card text-sm font-semibold hover:bg-brand-100"
+            >
               Cancelar
             </button>
-            <button type="submit" disabled={loading}
-              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 hover:bg-brand-500 disabled:opacity-70">
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 hover:bg-brand-500 disabled:opacity-70"
+            >
               {loading && <Loader2 className="size-4 animate-spin" />}
               {loading ? "Salvando..." : isEdit ? "Salvar alterações" : "Salvar"}
             </button>
@@ -1043,10 +1207,16 @@ function AppointmentModal({
 }
 
 // ── field ──────────────────────────────────────────────────
-function Field({ label, error, children }: Readonly<{ label: string; error?: string; children: React.ReactNode }>) {
+function Field({
+  label,
+  error,
+  children,
+}: Readonly<{ label: string; error?: string; children: React.ReactNode }>) {
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-brand-900/60">{label}</label>
+      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-brand-900/60">
+        {label}
+      </label>
       {children}
       {error && <p className="mt-1 text-xs font-medium text-destructive">{error}</p>}
     </div>

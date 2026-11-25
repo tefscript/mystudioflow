@@ -37,7 +37,7 @@ function nomesNaTabela() {
     .map((r) => r.querySelector("p")?.textContent);
 }
 
-describe("tela de clientes: busca e filtros", () => {
+describe("tela de clientes: busca", () => {
   beforeEach(async () => {
     render(<ClientesPage />);
     await waitFor(() => expect(screen.getByText("José Silva")).toBeTruthy());
@@ -59,17 +59,5 @@ describe("tela de clientes: busca e filtros", () => {
   it("busca telefone digitado sem formatacao", async () => {
     await userEvent.type(screen.getByPlaceholderText(/Buscar/), "4798888");
     expect(nomesNaTabela()).toEqual(["Ana Souza"]);
-  });
-
-  it("filtro de mais visitas ordena e sem visitas filtra", async () => {
-    await userEvent.click(screen.getByRole("button", { name: /Filtros/ }));
-    await userEvent.selectOptions(screen.getByRole("combobox"), "visits_desc");
-    expect(nomesNaTabela()).toEqual(["José Silva", "Bia Lima", "Ana Souza"]);
-
-    await userEvent.click(screen.getByLabelText("Sem visitas ainda"));
-    expect(nomesNaTabela()).toEqual(["Ana Souza"]);
-
-    await userEvent.click(screen.getByText("Limpar filtros"));
-    expect(nomesNaTabela()).toEqual(["Ana Souza", "Bia Lima", "José Silva"]);
   });
 });

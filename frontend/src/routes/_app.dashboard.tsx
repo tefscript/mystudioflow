@@ -278,63 +278,78 @@ function EmptyState() {
 const dicas = [
   {
     curta: "Cliente satisfeita não precisa de desconto — precisa de data marcada.",
-    completa: "A fidelização vem do relacionamento, não do preço. Quando a cliente sai feliz, ela já está pensando no próximo agendamento. Facilite isso com lembretes e confirmações automáticas.",
+    completa:
+      "A fidelização vem do relacionamento, não do preço. Quando a cliente sai feliz, ela já está pensando no próximo agendamento. Facilite isso com lembretes e confirmações automáticas.",
   },
   {
     curta: "Se a cliente pediu 'natural', prepare-se para refazer três vezes.",
-    completa: "O famoso 'natural' é um dos pedidos mais subjetivos da beleza. Invista em consultas rápidas antes do procedimento para alinhar expectativas e evitar retrabalho.",
+    completa:
+      "O famoso 'natural' é um dos pedidos mais subjetivos da beleza. Invista em consultas rápidas antes do procedimento para alinhar expectativas e evitar retrabalho.",
   },
   {
     curta: "Agenda cheia é resultado de atendimento caprichado, não de sorte.",
-    completa: "Profissionais com agenda lotada raramente chegam lá por acidente. É consistência, capricho no detalhe e atenção genuína à cliente que geram indicações espontâneas.",
+    completa:
+      "Profissionais com agenda lotada raramente chegam lá por acidente. É consistência, capricho no detalhe e atenção genuína à cliente que geram indicações espontâneas.",
   },
   {
     curta: "O fio de sobrancelha que você não tirou hoje vai aparecer na foto de amanhã.",
-    completa: "Atenção aos detalhes é o que separa um bom atendimento de um atendimento inesquecível. A cliente pode não notar o que você fez, mas vai notar o que você deixou de fazer.",
+    completa:
+      "Atenção aos detalhes é o que separa um bom atendimento de um atendimento inesquecível. A cliente pode não notar o que você fez, mas vai notar o que você deixou de fazer.",
   },
   {
     curta: "Fidelização começa no WhatsApp: uma mensagem de confirmação já faz diferença.",
-    completa: "Comunicação proativa transmite profissionalismo. Confirmar o agendamento com antecedência reduz faltas e mostra que você valoriza o tempo da cliente — e o seu.",
+    completa:
+      "Comunicação proativa transmite profissionalismo. Confirmar o agendamento com antecedência reduz faltas e mostra que você valoriza o tempo da cliente — e o seu.",
   },
   {
     curta: "Sua melhor vitrine é a cliente saindo pela porta sorrindo.",
-    completa: "O marketing boca a boca ainda é o mais poderoso no setor de beleza. Cada cliente satisfeita é uma potencial divulgadora do seu trabalho no círculo social dela.",
+    completa:
+      "O marketing boca a boca ainda é o mais poderoso no setor de beleza. Cada cliente satisfeita é uma potencial divulgadora do seu trabalho no círculo social dela.",
   },
   {
     curta: "Não subestime o poder de lembrar o nome da cliente na segunda visita.",
-    completa: "Pequenos gestos de personalização criam uma conexão emocional forte. Use as anotações do perfil da cliente para surpreendê-la com detalhes que mostram que você se importa.",
+    completa:
+      "Pequenos gestos de personalização criam uma conexão emocional forte. Use as anotações do perfil da cliente para surpreendê-la com detalhes que mostram que você se importa.",
   },
   {
     curta: "Foto boa de resultado vale mais que dez posts de frase motivacional.",
-    completa: "No setor de beleza, o portfólio é tudo. Invista em boa iluminação e peça permissão para fotografar o resultado. Antes e depois bem feitos geram muito mais engajamento.",
+    completa:
+      "No setor de beleza, o portfólio é tudo. Invista em boa iluminação e peça permissão para fotografar o resultado. Antes e depois bem feitos geram muito mais engajamento.",
   },
   {
     curta: "Cliente que cancela em cima da hora não é cliente — é um treino de paciência.",
-    completa: "Estabeleça uma política de cancelamento clara e gentil. Comunicar com antecedência protege sua agenda e educa a clientela sobre o valor do seu tempo.",
+    completa:
+      "Estabeleça uma política de cancelamento clara e gentil. Comunicar com antecedência protege sua agenda e educa a clientela sobre o valor do seu tempo.",
   },
   {
     curta: "Manter a agenda organizada é autocuidado profissional.",
-    completa: "Uma agenda bagunçada gera estresse, atrasos e impressão de amadorismo. Organizar seus horários é respeitar a si mesma e às suas clientes.",
+    completa:
+      "Uma agenda bagunçada gera estresse, atrasos e impressão de amadorismo. Organizar seus horários é respeitar a si mesma e às suas clientes.",
   },
   {
     curta: "O estudo nunca para — nem na área da beleza.",
-    completa: "Tendências mudam rápido. Profissionais que investem em capacitação constante se destacam e conseguem cobrar mais pelo diferencial de técnica e conhecimento.",
+    completa:
+      "Tendências mudam rápido. Profissionais que investem em capacitação constante se destacam e conseguem cobrar mais pelo diferencial de técnica e conhecimento.",
   },
   {
     curta: "Precificação errada é trabalho grátis com etiqueta de preço.",
-    completa: "Calcule seus custos fixos, variáveis, tempo e margem de lucro. Cobrar pouco desvaloriza seu trabalho e insustenta o negócio. Cliente que valoriza seu trabalho paga o preço justo.",
+    completa:
+      "Calcule seus custos fixos, variáveis, tempo e margem de lucro. Cobrar pouco desvaloriza seu trabalho e insustenta o negócio. Cliente que valoriza seu trabalho paga o preço justo.",
   },
   {
     curta: "Retorno de cliente é mais barato que conquistar uma nova.",
-    completa: "Estratégias de retenção como lembretes de retorno, programas de fidelidade e atendimento personalizado custam menos do que aquisição de novas clientes e geram receita mais previsível.",
+    completa:
+      "Estratégias de retenção como lembretes de retorno, programas de fidelidade e atendimento personalizado custam menos do que aquisição de novas clientes e geram receita mais previsível.",
   },
   {
     curta: "Glitter é lindo até você encontrá-lo seis meses depois em lugares inexplicáveis.",
-    completa: "Organização do espaço de trabalho é parte do atendimento. Um estúdio limpo, cheiroso e bem organizado já passa confiança antes mesmo de você pegar no pincel.",
+    completa:
+      "Organização do espaço de trabalho é parte do atendimento. Um estúdio limpo, cheiroso e bem organizado já passa confiança antes mesmo de você pegar no pincel.",
   },
   {
     curta: "Uma avaliação no Google vale mais que um outdoor.",
-    completa: "Peça avaliações às clientes satisfeitas — muitas esquecem mas fazem de bom grado quando solicitadas. Presença digital sólida é fundamental para atrair novas clientes na sua região.",
+    completa:
+      "Peça avaliações às clientes satisfeitas — muitas esquecem mas fazem de bom grado quando solicitadas. Presença digital sólida é fundamental para atrair novas clientes na sua região.",
   },
 ];
 
@@ -343,18 +358,12 @@ function DicaDoDia() {
   const dica = dicas[new Date().getDate() % dicas.length];
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-brand-900 p-8 text-white">
+    <div className="relative overflow-hidden rounded-3xl bg-brand-900 p-8 text-white dark:border dark:border-border dark:bg-card">
       <div className="absolute -right-10 -bottom-10 size-40 rounded-full bg-brand-500/20 blur-3xl" />
       <div className="relative z-10">
         <h3 className="mb-2 font-serif text-lg italic">Dica do dia</h3>
-        <p className="mb-4 text-sm leading-relaxed text-white/70">
-          "{dica.curta}"
-        </p>
-        {expandida && (
-          <p className="mb-4 text-sm leading-relaxed text-white/90">
-            {dica.completa}
-          </p>
-        )}
+        <p className="mb-4 text-sm leading-relaxed text-white/70">"{dica.curta}"</p>
+        {expandida && <p className="mb-4 text-sm leading-relaxed text-white/90">{dica.completa}</p>}
         <button
           onClick={() => setExpandida((v) => !v)}
           className="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold transition-colors hover:bg-white/20"
