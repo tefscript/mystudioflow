@@ -48,12 +48,48 @@ async function getConfig(userId: string) {
   };
 }
 
+// No Brasil, contas antigas de WhatsApp ficaram registradas sem o nono digito
+// (55 47 9617-1992 em vez de 55 47 99617-1992). Mandando pro numero com o 9, a
+// EvolutionAPI aceita mas a mensagem nunca chega. Entao pergunta pro WhatsApp
+// qual e o numero real antes de enviar. Se a consulta falhar, usa o numero como esta.
+async function resolveWhatsAppNumber(
+  config: { url: string; key: string; instance: string },
+  formatted: string,
+): Promise<string> {
+  try {
+    const res = await fetch(`${config.url}/chat/whatsappNumbers/${config.instance}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: config.key },
+      body: JSON.stringify({ numbers: [formatted] }),
+    });
+    if (!res.ok) return formatted;
+    const data = (await res.json()) as Array<{ exists?: boolean; jid?: string }>;
+    const found = data?.[0];
+    if (found?.exists === false) {
+      console.warn("[whatsapp] numero da cliente nao tem WhatsApp");
+    }
+    const real = found?.jid?.split("@")[0];
+    return found?.exists && real ? real : formatted;
+  } catch {
+    return formatted;
+  }
+}
+
 export async function sendWhatsAppMessage(userId: string, phone: string, text: string): Promise<void> {
   const config = await getConfig(userId);
-  if (!config.url || !config.key || !config.instance || !phone) return;
+  if (!config.url || !config.key || !config.instance) {
+    console.warn("[whatsapp] envio pulado: whatsapp nao conectado (sem instancia configurada)");
+    return;
+  }
+  if (!phone) return;
 
   const formatted = formatPhone(phone);
-  if (formatted.length < 12) return;
+  if (formatted.length < 12) {
+    console.warn("[whatsapp] envio pulado: telefone da cliente incompleto");
+    return;
+  }
+
+  const number = await resolveWhatsAppNumber(config, formatted);
 
   const response = await fetch(`${config.url}/message/sendText/${config.instance}`, {
     method: "POST",
@@ -61,7 +97,7 @@ export async function sendWhatsAppMessage(userId: string, phone: string, text: s
       "Content-Type": "application/json",
       apikey: config.key,
     },
-    body: JSON.stringify({ number: formatted, text }),
+    body: JSON.stringify({ number, text }),
   });
 
   if (!response.ok) {

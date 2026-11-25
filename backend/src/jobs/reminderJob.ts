@@ -83,7 +83,10 @@ export function startReminderJob() {
           );
           if (!statusRes.ok) continue;
 
-          const { state } = await statusRes.json() as { state?: string };
+          // a EvolutionAPI responde { instance: { state } }; antes lia so "state" e
+          // apagava toda madrugada a instancia mesmo conectada
+          const data = (await statusRes.json()) as { state?: string; instance?: { state?: string } };
+          const state = data.instance?.state ?? data.state;
           if (state === "open") continue; // já conectada, não mexe
 
           // conectando há mais de 1 dia — deleta
