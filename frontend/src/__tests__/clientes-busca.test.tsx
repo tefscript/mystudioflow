@@ -23,7 +23,13 @@ const clientes = [
 ];
 
 vi.mock("@/lib/api", () => ({
-  clientsApi: { list: vi.fn(() => Promise.resolve(clientes)) },
+  clientsApi: {
+    list: vi.fn(() => Promise.resolve(clientes)),
+    history: vi.fn(() => Promise.resolve([])),
+    update: vi.fn((id: string, data: object) =>
+      Promise.resolve({ ...clientes.find((c) => c.id === id), ...data }),
+    ),
+  },
 }));
 
 import { Route } from "../routes/_app.clientes";
@@ -59,5 +65,22 @@ describe("tela de clientes: busca", () => {
   it("busca telefone digitado sem formatacao", async () => {
     await userEvent.type(screen.getByPlaceholderText(/Buscar/), "4798888");
     expect(nomesNaTabela()).toEqual(["Ana Souza"]);
+  });
+
+  it("edita a cliente depois de criada", async () => {
+    await userEvent.click(screen.getByText("Bia Lima"));
+    await userEvent.click(await screen.findByRole("button", { name: /Editar/ }));
+
+    const email = screen.getByDisplayValue("bia@x.com");
+    await userEvent.clear(email);
+    await userEvent.type(email, "bia.nova@x.com");
+    await userEvent.type(screen.getByPlaceholderText(/Preferências/), "alergia a esmalte");
+    await userEvent.click(screen.getByRole("button", { name: "Salvar" }));
+
+    const { clientsApi } = await import("@/lib/api");
+    expect(clientsApi.update).toHaveBeenCalledWith(
+      "3",
+      expect.objectContaining({ email: "bia.nova@x.com", notes: "alergia a esmalte" }),
+    );
   });
 });

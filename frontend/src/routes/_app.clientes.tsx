@@ -3,7 +3,7 @@ import { useMemo, useState, useEffect } from "react";
 import { PageHeader, PrimaryButton } from "@/components/AppShell";
 import { clientsApi } from "@/lib/api";
 import type { Client, ClientHistoryItem, AppointmentStatus } from "@/lib/api";
-import { Search, Phone, Mail, X, Loader2, MessageCircle } from "lucide-react";
+import { Search, Phone, Mail, X, Loader2, MessageCircle, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
 
@@ -22,6 +22,7 @@ function ClientesPage() {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Client | null>(null);
+  const [editing, setEditing] = useState<Client | null>(null);
 
   useEffect(() => {
     clientsApi
@@ -165,6 +166,22 @@ function ClientesPage() {
             setList((prev) => prev.filter((c) => c.id !== id));
             setSelected(null);
           }}
+          onEdit={() => {
+            setEditing(selected);
+            setSelected(null);
+          }}
+        />
+      )}
+
+      {editing && (
+        <ClientModal
+          client={editing}
+          onClose={() => setEditing(null)}
+          onSave={(c) => {
+            setList((prev) => prev.map((x) => (x.id === c.id ? c : x)));
+            setEditing(null);
+            toast.success("Cliente atualizada!");
+          }}
         />
       )}
     </div>
@@ -172,13 +189,15 @@ function ClientesPage() {
 }
 
 function ClientModal({
+  client,
   onClose,
   onSave,
-}: Readonly<{ onClose: () => void; onSave: (c: Client) => void }>) {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [notes, setNotes] = useState("");
+}: Readonly<{ client?: Client; onClose: () => void; onSave: (c: Client) => void }>) {
+  // com client = modo edicao, ja vem preenchido
+  const [name, setName] = useState(client?.name ?? "");
+  const [phone, setPhone] = useState(client?.phone ?? "");
+  const [email, setEmail] = useState(client?.email ?? "");
+  const [notes, setNotes] = useState(client?.notes ?? "");
   const [loading, setLoading] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
@@ -189,15 +208,17 @@ function ClientModal({
     }
     setLoading(true);
     try {
-      const client = await clientsApi.create({
-        name,
-        phone,
-        email: email || undefined,
-        notes: notes || undefined,
-      });
-      onSave(client);
+      const saved = client
+        ? await clientsApi.update(client.id, { name, phone, email, notes })
+        : await clientsApi.create({
+            name,
+            phone,
+            email: email || undefined,
+            notes: notes || undefined,
+          });
+      onSave(saved);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao cadastrar cliente");
+      toast.error(err instanceof Error ? err.message : "Erro ao salvar cliente");
     } finally {
       setLoading(false);
     }
@@ -207,7 +228,9 @@ function ClientModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-brand-900/40 backdrop-blur-sm md:items-center md:p-4">
       <div className="w-full max-w-md animate-float-in rounded-t-3xl bg-card p-6 shadow-2xl md:rounded-3xl md:p-8">
         <div className="mb-6 flex items-start justify-between">
-          <h2 className="font-serif text-2xl font-semibold">Nova cliente</h2>
+          <h2 className="font-serif text-2xl font-semibold">
+            {client ? "Editar cliente" : "Nova cliente"}
+          </h2>
           <button onClick={onClose} className="rounded-xl p-2 hover:bg-brand-100">
             <X className="size-4" />
           </button>
@@ -270,10 +293,12 @@ function ClientDetail({
   client,
   onClose,
   onDelete,
+  onEdit,
 }: Readonly<{
   client: Client;
   onClose: () => void;
   onDelete: (id: string) => void;
+  onEdit: () => void;
 }>) {
   const [deleting, setDeleting] = useState(false);
   const [history, setHistory] = useState<ClientHistoryItem[] | null>(null);
@@ -389,6 +414,12 @@ function ClientDetail({
           >
             <MessageCircle className="size-4" /> Enviar WhatsApp
           </a>
+          <button
+            onClick={onEdit}
+            className="flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold hover:bg-brand-100"
+          >
+            <Pencil className="size-4" /> Editar
+          </button>
           <button
             onClick={handleDelete}
             disabled={deleting}

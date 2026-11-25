@@ -118,9 +118,14 @@ router.put("/:id", async (req: AuthRequest, res: Response): Promise<void> => {
     return;
   }
 
+  // campo enviado vazio na edicao = apagar (o schema transforma "" em undefined, que o Prisma ignora)
   const client = await prisma.client.update({
     where: { id },
-    data: parse.data,
+    data: {
+      ...parse.data,
+      ...(req.body.email === "" ? { email: null } : {}),
+      ...(req.body.notes === "" ? { notes: null } : {}),
+    },
   });
 
   res.json(client);

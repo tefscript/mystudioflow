@@ -5,21 +5,21 @@ import { requireAuth, AuthRequest } from "../middleware/auth";
 const router = Router();
 router.use(requireAuth);
 
-function getMonday(date: Date): Date {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  d.setDate(diff);
-  return d;
+// data no horario de Brasilia (o servidor roda em UTC; depois das 21h o UTC ja e o dia seguinte)
+function toDateStr(d: Date): string {
+  return d.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
 }
 
-function toDateStr(d: Date): string {
+function addDaysStr(dateStr: string, days: number): string {
+  const d = new Date(`${dateStr}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().split("T")[0];
 }
 
 router.get("/", async (req: AuthRequest, res: Response): Promise<void> => {
   const today = toDateStr(new Date());
-  const monday = toDateStr(getMonday(new Date()));
+  // ultimos 7 dias contando hoje (antes era desde segunda, e na segunda zerava)
+  const weekStart = addDaysStr(today, -6);
   const firstOfMonth = today.slice(0, 8) + "01";
 
   const userId = req.userId!;
@@ -44,7 +44,8 @@ router.get("/", async (req: AuthRequest, res: Response): Promise<void> => {
     prisma.client.count({ where: { userId, lastVisit: { gte: firstOfMonth } } }),
     prisma.client.count({ where: { userId, visits: { gt: 1 } } }),
     prisma.appointment.findMany({
-      where: { userId, date: { gte: monday, lte: today }, status: "concluido" },
+      // conta tudo que nao foi cancelado (antes so "concluido", que quase ninguem marca)
+      where: { userId, date: { gte: weekStart, lte: today }, status: { not: "cancelado" } },
       include: {
         services: { include: { service: { select: { price: true } } } },
       },
@@ -64,8 +65,8 @@ router.get("/", async (req: AuthRequest, res: Response): Promise<void> => {
     }),
   ]);
 
-  // Receita por dia da semana
-  const DAYS_PT = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+  // Receita por dia (ultimos 7 dias)
+  const DAYS_PT = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
   const revenueByDay: Record<string, number> = {};
   for (const apt of weekRevenueRaw) {
     const aptRevenue = apt.services.reduce((sum, as) => sum + Number(as.service.price), 0);
@@ -73,10 +74,9 @@ router.get("/", async (req: AuthRequest, res: Response): Promise<void> => {
   }
 
   const revenueWeek = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(d.getDate() + i);
-    const dateStr = toDateStr(d);
-    return { day: DAYS_PT[i], value: revenueByDay[dateStr] || 0 };
+    const dateStr = addDaysStr(weekStart, i);
+    const weekday = new Date(`${dateStr}T12:00:00Z`).getUTCDay();
+    return { day: DAYS_PT[weekday], value: revenueByDay[dateStr] || 0 };
   });
 
   const weekRevenue = Object.values(revenueByDay).reduce((a, b) => a + b, 0);
