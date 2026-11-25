@@ -241,6 +241,23 @@ export const dashboardApi = {
 };
 
 // ---------------------------------------------------------------------------
+// Notifications API
+// ---------------------------------------------------------------------------
+
+export interface AppNotification {
+  id: string;
+  type: "confirmado" | "cancelado";
+  client_name: string;
+  date: string;
+  time: string;
+  at: string;
+}
+
+export const notificationsApi = {
+  list: () => req<AppNotification[]>("GET", "/notifications"),
+};
+
+// ---------------------------------------------------------------------------
 // Settings API
 // ---------------------------------------------------------------------------
 

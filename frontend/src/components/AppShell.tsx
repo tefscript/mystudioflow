@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { authApi, clearToken } from "@/lib/api";
+import { authApi, clearToken, notificationsApi } from "@/lib/api";
 import {
   LayoutDashboard,
   Calendar,
@@ -15,6 +15,8 @@ import {
   Menu,
   X,
   LogOut,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -131,25 +133,108 @@ function NotificationButton() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // atualiza sozinho a cada minuto
+  const { data: items = [] } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: notificationsApi.list,
+    refetchInterval: 60_000,
+  });
+
+  // "lido" fica no navegador: tudo que mudou depois da ultima vez que abriu o sino e novo
+  const [lastSeen, setLastSeen] = useState(() => readLastSeen());
+  const unread = items.filter((n) => new Date(n.at).getTime() > lastSeen).length;
+
+  function toggle() {
+    const willOpen = !open;
+    setOpen(willOpen);
+    if (willOpen) {
+      const now = Date.now();
+      try {
+        localStorage.setItem(LAST_SEEN_KEY, String(now));
+      } catch {
+        // sem localStorage o sino so nao lembra o que ja foi visto
+      }
+      // espera fechar pra apagar o destaque dos novos
+      setTimeout(() => setLastSeen(now), 3000);
+    }
+  }
+
   return (
     <div ref={ref} className="relative">
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
+        aria-label="Notificações"
         className="relative rounded-xl border border-border bg-card p-2.5 transition-colors hover:bg-brand-100"
       >
         <Bell className="size-4" />
-        <span className="absolute right-2 top-2 size-2 rounded-full bg-brand-500" />
+        {unread > 0 && (
+          <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
+            {unread > 9 ? "9+" : unread}
+          </span>
+        )}
       </button>
       {open && (
-        <div className="absolute right-0 top-12 z-50 w-72 rounded-2xl border border-border bg-card p-5 shadow-lg">
+        <div className="absolute right-0 top-12 z-50 w-80 rounded-2xl border border-border bg-card p-5 shadow-lg">
           <p className="text-sm font-semibold">Notificações</p>
-          <p className="mt-3 text-xs text-brand-900/50">
-            Em breve: você receberá alertas de novos agendamentos, cancelamentos e confirmações diretamente aqui.
-          </p>
+          {items.length === 0 ? (
+            <p className="mt-3 text-xs text-brand-900/50">
+              Nenhuma confirmação ou cancelamento nos últimos 7 dias.
+            </p>
+          ) : (
+            <ul className="mt-3 max-h-80 space-y-2 overflow-y-auto">
+              {items.map((n) => {
+                const isNew = new Date(n.at).getTime() > lastSeen;
+                const [, m, d] = n.date.split("-");
+                return (
+                  <li
+                    key={n.id}
+                    className={cn(
+                      "flex items-start gap-3 rounded-xl p-2 text-xs",
+                      isNew && "bg-brand-50",
+                    )}
+                  >
+                    {n.type === "confirmado" ? (
+                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                    ) : (
+                      <XCircle className="mt-0.5 size-4 shrink-0 text-red-500" />
+                    )}
+                    <div>
+                      <p>
+                        <span className="font-semibold">{n.client_name}</span>{" "}
+                        {n.type === "confirmado" ? "confirmou" : "cancelou"} o horário de {d}/{m} às{" "}
+                        {n.time}
+                      </p>
+                      <p className="mt-0.5 text-brand-900/50">{timeAgo(n.at)}</p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       )}
     </div>
   );
+}
+
+const LAST_SEEN_KEY = "sf_notifications_seen";
+
+function readLastSeen(): number {
+  try {
+    return Number(localStorage.getItem(LAST_SEEN_KEY)) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function timeAgo(iso: string): string {
+  const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
+  if (min < 1) return "agora";
+  if (min < 60) return `há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `há ${h} h`;
+  const d = Math.floor(h / 24);
+  return d === 1 ? "ontem" : `há ${d} dias`;
 }
 
 function SidebarContent() {
@@ -157,7 +242,12 @@ function SidebarContent() {
   const navigate = useNavigate();
   const { data: user } = useQuery({ queryKey: ["me"], queryFn: authApi.me });
   const initials = user?.studio_name
-    ? user.studio_name.split(" ").slice(0, 2).map((w: string) => w[0]).join("").toUpperCase()
+    ? user.studio_name
+        .split(" ")
+        .slice(0, 2)
+        .map((w: string) => w[0])
+        .join("")
+        .toUpperCase()
     : "SF";
 
   function logout() {

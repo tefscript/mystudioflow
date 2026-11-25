@@ -9,6 +9,7 @@ import dashboardRoutes from "./routes/dashboard";
 import settingsRoutes from "./routes/settings";
 import profileRoutes from "./routes/profile";
 import whatsappRoutes from "./routes/whatsapp";
+import notificationRoutes from "./routes/notifications";
 import prisma from "./lib/prisma";
 
 const app = express();
@@ -32,6 +33,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/whatsapp", whatsappRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/api/health", async (_req, res) => {
   try {
