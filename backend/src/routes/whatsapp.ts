@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { requireAuth, AuthRequest } from "../middleware/auth";
 import prisma from "../lib/prisma";
-import { sendWhatsAppMessage } from "../services/whatsapp";
+import { sendWhatsAppMessage, logWhatsAppError } from "../services/whatsapp";
 
 const router = Router();
 
@@ -81,7 +81,7 @@ router.post("/webhook", async (req: Request, res: Response): Promise<void> => {
         ? `Confirmado ${nome}! Te espero às ${hora} 🤎`
         : `Tudo bem ${nome}, cancelei aqui pra você. Se quiser remarcar é só chamar!`;
 
-      await sendWhatsAppMessage(client.userId, client.phone, replyText).catch(() => {});
+      await sendWhatsAppMessage(client.userId, client.phone, replyText).catch((err) => logWhatsAppError("resposta do webhook", err));
     }
   } catch {
     // silencioso

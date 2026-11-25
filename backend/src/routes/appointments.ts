@@ -2,7 +2,7 @@ import { Router, Response } from "express";
 import { z } from "zod";
 import prisma from "../lib/prisma";
 import { requireAuth, AuthRequest } from "../middleware/auth";
-import { sendWhatsAppConfirmation, sendWhatsAppReschedule } from "../services/whatsapp";
+import { sendWhatsAppConfirmation, sendWhatsAppReschedule, logWhatsAppError } from "../services/whatsapp";
 
 const router = Router();
 router.use(requireAuth);
@@ -172,7 +172,7 @@ router.post("/", async (req: AuthRequest, res: Response): Promise<void> => {
     serviceName: serviceNames,
     date,
     time,
-  }).catch(() => {});
+  }).catch((err) => logWhatsAppError("confirmacao", err));
 
   res.status(201).json(formatAppointment(apt));
 });
@@ -256,7 +256,7 @@ router.put("/:id", async (req: AuthRequest, res: Response): Promise<void> => {
       time: newTime,
       oldDate: existing.date,
       oldTime: existing.time,
-    }).catch(() => {});
+    }).catch((err) => logWhatsAppError("reagendamento", err));
   }
 });
 

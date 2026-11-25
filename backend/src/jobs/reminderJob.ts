@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import prisma from "../lib/prisma";
-import { sendWhatsAppReminder } from "../services/whatsapp";
+import { sendWhatsAppReminder, logWhatsAppError } from "../services/whatsapp";
 
 const TZ = "America/Sao_Paulo";
 
@@ -53,7 +53,7 @@ export function startReminderJob() {
           serviceName,
           date: apt.date,
           time: apt.time,
-        }).catch(() => {});
+        }).catch((err) => logWhatsAppError("lembrete", err));
       }
     } catch {
       // silencioso — não travar o servidor por falha no cron

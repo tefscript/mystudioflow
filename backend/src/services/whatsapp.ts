@@ -122,3 +122,10 @@ export async function sendWhatsAppReminder(payload: ReminderPayload): Promise<vo
   });
   await sendWhatsAppMessage(payload.userId, payload.clientPhone, text);
 }
+
+// registra no log quando um envio falha, sem derrubar a requisicao
+// (quebras de linha removidas pra evitar log injection)
+export function logWhatsAppError(tipo: string, err: unknown): void {
+  const msg = err instanceof Error ? err.message : String(err);
+  console.error(`[whatsapp] falha ao enviar ${tipo}: ${msg.replace(/[\r\n]+/g, " ")}`);
+}
