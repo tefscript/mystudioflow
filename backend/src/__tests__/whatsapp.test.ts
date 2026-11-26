@@ -57,7 +57,13 @@ describe("POST /api/whatsapp/webhook", () => {
     expect(prisma.client.findMany).not.toHaveBeenCalled();
   });
 
-  it("processa confirmação e atualiza status para confirmado", async () => {
+  // cada linha e uma resposta da cliente e o status que ela deve gerar.
+  // "Não vou poder ir" tem "vou" (confirmar) e "nao" (cancelar): cancelamento tem prioridade
+  it.each([
+    ["Sim, confirmo!", "confirmado"],
+    ["Não posso comparecer", "cancelado"],
+    ["Não vou poder ir", "cancelado"],
+  ])("resposta \"%s\" deixa o agendamento %s", async (mensagem, statusEsperado) => {
     vi.mocked(prisma.client.findMany).mockResolvedValue([
       { id: "client-1", userId: "user-1", name: "Ana Silva", phone: "47999990000" } as any,
     ]);
@@ -76,7 +82,7 @@ describe("POST /api/whatsapp/webhook", () => {
         event: "messages.upsert",
         data: {
           key: { fromMe: false, remoteJid: "5547999990000@s.whatsapp.net" },
-          message: { conversation: "Sim, confirmo!" },
+          message: { conversation: mensagem },
         },
       });
 
@@ -84,65 +90,7 @@ describe("POST /api/whatsapp/webhook", () => {
     // espera async processar
     await new Promise((r) => setTimeout(r, 50));
     expect(prisma.appointment.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: { status: "confirmado" } })
-    );
-  });
-
-  it("processa cancelamento e atualiza status para cancelado", async () => {
-    vi.mocked(prisma.client.findMany).mockResolvedValue([
-      { id: "client-1", userId: "user-1", name: "Ana", phone: "47999990000" } as any,
-    ]);
-    vi.mocked(prisma.appointment.findFirst).mockResolvedValue({
-      id: "apt-1",
-      date: new Date().toISOString().split("T")[0],
-      time: "10:00",
-      status: "aguardando",
-      services: [],
-    } as any);
-    vi.mocked(prisma.appointment.update).mockResolvedValue({} as any);
-
-    await request(app)
-      .post("/api/whatsapp/webhook")
-      .send({
-        event: "messages.upsert",
-        data: {
-          key: { fromMe: false, remoteJid: "5547999990000@s.whatsapp.net" },
-          message: { conversation: "Não posso comparecer" },
-        },
-      });
-
-    await new Promise((r) => setTimeout(r, 50));
-    expect(prisma.appointment.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: { status: "cancelado" } })
-    );
-  });
-
-  it("cancela quando a mensagem tem palavra de confirmar e de cancelar", async () => {
-    vi.mocked(prisma.client.findMany).mockResolvedValue([
-      { id: "client-1", userId: "user-1", name: "Ana", phone: "47999990000" } as any,
-    ]);
-    vi.mocked(prisma.appointment.findFirst).mockResolvedValue({
-      id: "apt-1",
-      date: new Date().toISOString().split("T")[0],
-      time: "10:00",
-      status: "aguardando",
-      services: [],
-    } as any);
-    vi.mocked(prisma.appointment.update).mockResolvedValue({} as any);
-
-    await request(app)
-      .post("/api/whatsapp/webhook")
-      .send({
-        event: "messages.upsert",
-        data: {
-          key: { fromMe: false, remoteJid: "5547999990000@s.whatsapp.net" },
-          message: { conversation: "Não vou poder ir" },
-        },
-      });
-
-    await new Promise((r) => setTimeout(r, 50));
-    expect(prisma.appointment.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: { status: "cancelado" } })
+      expect.objectContaining({ data: { status: statusEsperado } })
     );
   });
 
